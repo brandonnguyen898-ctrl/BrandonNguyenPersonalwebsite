@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 
 const NAV_LINKS = [
   { label: "About", href: "#about" },
@@ -151,6 +152,7 @@ export default function Home() {
         }}
       >
         <div className="max-w-6xl mx-auto px-6 py-24 grid md:grid-cols-2 gap-16 items-center">
+          {/* Text + Stats */}
           <div>
             <div className="mb-4">
               <Badge>Open to Opportunities</Badge>
@@ -160,12 +162,12 @@ export default function Home() {
               <br />
               <span style={{ color: "#00356b" }}>Luu Nguyen</span>
             </h1>
-            <p className="text-lg text-slate-600 leading-relaxed mb-8 max-w-lg">
+            <p className="text-lg text-slate-600 leading-relaxed mb-6 max-w-lg">
               Yale University student studying Economics &amp; Chemistry. Investor, researcher,
               and founder — driven by financial modeling, scientific inquiry, and community impact.
             </p>
 
-            <div className="flex flex-wrap gap-3 mb-8 text-sm text-slate-500">
+            <div className="flex flex-wrap gap-3 mb-6 text-sm text-slate-500">
               <span className="flex items-center gap-1.5">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -187,7 +189,7 @@ export default function Home() {
               </span>
             </div>
 
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-3 mb-10">
               <a
                 href="https://www.linkedin.com/in/brandon-nguyen-246tr"
                 target="_blank"
@@ -207,27 +209,39 @@ export default function Home() {
                 Get in Touch
               </a>
             </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { value: "3.93", label: "Yale GPA", sub: "Economics & Chemistry" },
+                { value: "4.00", label: "TCC GPA", sub: "Perfect Score" },
+                { value: "#1", label: "Valedictorian", sub: "Class of 460" },
+                { value: "$20K", label: "Scholarship", sub: "Milton Fisher Award" },
+              ].map((stat) => (
+                <Card key={stat.label} className="text-center">
+                  <div className="text-3xl font-bold mb-1" style={{ color: "#00356b" }}>
+                    {stat.value}
+                  </div>
+                  <div className="text-sm font-semibold text-slate-800">{stat.label}</div>
+                  <div className="text-xs text-slate-500 mt-0.5">{stat.sub}</div>
+                </Card>
+              ))}
+            </div>
           </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-2 gap-4">
-            {[
-              { value: "3.93", label: "Yale GPA", sub: "Economics & Chemistry" },
-              { value: "4.00", label: "TCC GPA", sub: "Perfect Score" },
-              { value: "#1", label: "Valedictorian", sub: "Class of 460" },
-              { value: "$20K", label: "Scholarship", sub: "Milton Fisher Award" },
-            ].map((stat) => (
-              <Card key={stat.label} className="text-center">
-                <div
-                  className="text-3xl font-bold mb-1"
-                  style={{ color: "#00356b" }}
-                >
-                  {stat.value}
-                </div>
-                <div className="text-sm font-semibold text-slate-800">{stat.label}</div>
-                <div className="text-xs text-slate-500 mt-0.5">{stat.sub}</div>
-              </Card>
-            ))}
+          {/* Photo */}
+          <div className="flex justify-center md:justify-end">
+            <div className="relative w-80 h-96 md:w-96 md:h-[480px] rounded-3xl overflow-hidden shadow-2xl">
+              <Image
+                src="/profile.jpg"
+                alt="Brandon Luu Nguyen"
+                fill
+                className="object-cover object-top"
+                priority
+                sizes="(max-width: 768px) 320px, 384px"
+              />
+              <div className="absolute inset-0 rounded-3xl ring-1 ring-inset ring-black/10" />
+            </div>
           </div>
         </div>
       </section>
