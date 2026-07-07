@@ -481,21 +481,27 @@ export default function Home() {
                   style={{ fontSize: "0.82rem", color: "var(--text-3)" }}
                 >
                   {[
-                    { icon: "📍", t: "Tacoma, WA" },
-                    { icon: "✉", t: "B.nguyen@yale.edu" },
-                    { icon: "🎓", t: "GPA 3.93 / 4.00" },
-                  ].map((c) => (
-                    <span
-                      key={c.t}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
-                      style={{
-                        background: "rgba(255,255,255,0.04)",
-                        border:     "1px solid rgba(255,255,255,0.08)",
-                      }}
-                    >
-                      {c.icon} {c.t}
-                    </span>
-                  ))}
+                    { icon: "📍", t: "Tacoma, WA",        href: null              },
+                    { icon: "✉",  t: "B.nguyen@yale.edu", href: "mailto:B.nguyen@yale.edu" },
+                    { icon: "🎓", t: "GPA 3.93 / 4.00",   href: null              },
+                  ].map((c) => {
+                    const Tag = c.href ? "a" : "span";
+                    return (
+                      <Tag
+                        key={c.t}
+                        {...(c.href ? { href: c.href } : {})}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
+                        style={{
+                          background:     "rgba(255,255,255,0.04)",
+                          border:         "1px solid rgba(255,255,255,0.08)",
+                          textDecoration: "none",
+                          color:          "inherit",
+                        }}
+                      >
+                        {c.icon} {c.t}
+                      </Tag>
+                    );
+                  })}
                 </div>
 
                 <div className="flex flex-wrap gap-3">
@@ -731,7 +737,7 @@ export default function Home() {
                   </p>
                   {[
                     "UP Fund Investing & Consulting",
-                    "Spkyman Foreign Policy Fellow",
+                    "Spykman Foreign Policy Fellow",
                     "Yale Assoc. for Small Claims",
                     "Yale Real Estate Club",
                     "Horological Society of New York",
@@ -780,7 +786,7 @@ export default function Home() {
                 <div
                   key={cs.id}
                   className="glass cs-card shimmer lift reveal"
-                  style={{ animationDelay: `${idx * 0.08}s` }}
+                  style={{ transitionDelay: `${idx * 0.1}s` }}
                 >
                   {/* Header */}
                   <div
@@ -1248,7 +1254,7 @@ export default function Home() {
                 <div
                   key={cat.title}
                   className="glass rounded-xl reveal lift"
-                  style={{ padding: "22px", animationDelay: `${i * 0.06}s` }}
+                  style={{ padding: "22px", transitionDelay: `${i * 0.07}s` }}
                 >
                   <p
                     style={{
@@ -1393,20 +1399,31 @@ export default function Home() {
             >
               {[
                 { label: "Email",    value: "B.nguyen@yale.edu",  href: "mailto:B.nguyen@yale.edu" },
-                { label: "Phone",    value: "(253) 240-5196",     href: "tel:2532405196"           },
-                { label: "Location", value: "Tacoma, WA",         href: "#"                        },
-              ].map((c) => (
-                <a
-                  key={c.label}
-                  href={c.href}
-                  style={{ textAlign: "center", textDecoration: "none", padding: "8px 4px" }}
-                >
-                  <div style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-3)", marginBottom: "4px" }}>
-                    {c.label}
-                  </div>
-                  <div style={{ fontSize: "0.75rem", color: "var(--text-2)" }}>{c.value}</div>
-                </a>
-              ))}
+                { label: "Phone",    value: "(253) 240-5196",     href: "tel:+12532405196"          },
+                { label: "Location", value: "Tacoma, WA",         href: null                        },
+              ].map((c) => {
+                const Tag = c.href ? "a" : "div";
+                return (
+                  <Tag
+                    key={c.label}
+                    {...(c.href ? { href: c.href } : {})}
+                    style={{
+                      textAlign:      "center",
+                      textDecoration: "none",
+                      padding:        "8px 4px",
+                      transition:     "opacity 0.2s",
+                      cursor:         c.href ? "pointer" : "default",
+                    }}
+                    onMouseEnter={(e: React.MouseEvent<HTMLElement>) => { if (c.href) (e.currentTarget as HTMLElement).style.opacity = "0.7"; }}
+                    onMouseLeave={(e: React.MouseEvent<HTMLElement>) => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
+                  >
+                    <div style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-3)", marginBottom: "4px" }}>
+                      {c.label}
+                    </div>
+                    <div style={{ fontSize: "0.75rem", color: "var(--text-2)" }}>{c.value}</div>
+                  </Tag>
+                );
+              })}
             </div>
           </div>
         </section>
