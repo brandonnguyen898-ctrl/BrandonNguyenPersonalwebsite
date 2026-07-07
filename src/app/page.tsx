@@ -1,1226 +1,1410 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect } from "react";
 import Image from "next/image";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import OceanNav from "@/components/OceanNav";
 
-// ── Deterministic star positions (no Math.random for hydration safety) ──
-const STARS = Array.from({ length: 50 }, (_, i) => ({
+// ── Deterministic stars (no Math.random — avoids hydration mismatch) ──
+const STARS = Array.from({ length: 65 }, (_, i) => ({
   id: i,
   x: (i * 73 + 11) % 100,
-  y: (i * 37 + 7) % 38,
-  size: i % 5 === 0 ? 2 : 1,
-  opacity: ((i * 17) % 6) / 10 + 0.1,
+  y: (i * 37 + 7) % 48,
+  size: i % 6 === 0 ? 2 : 1,
+  opacity: ((i * 17) % 5) / 10 + 0.05,
   delay: ((i * 13) % 30) / 10,
-  dur: 2 + ((i * 7) % 30) / 10,
+  dur: 2.5 + ((i * 7) % 25) / 10,
 }));
 
-// ── SVG: Luxury Speedboat (top-down) ──
-function BoatSVG({ dir = 1 }: { dir?: 1 | -1 }) {
-  return (
-    <svg
-      viewBox="0 0 220 72"
-      xmlns="http://www.w3.org/2000/svg"
-      style={{ transform: dir === -1 ? "scaleX(-1)" : "none", display: "block" }}
-    >
-      {/* Drop shadow */}
-      <ellipse cx="110" cy="52" rx="95" ry="16" fill="rgba(0,0,0,0.35)" />
-      {/* Hull outer – deep navy */}
-      <path
-        d="M6,36 Q14,18 110,15 Q184,15 214,36 Q184,57 110,57 Q14,54 6,36 Z"
-        fill="#0a1628"
-      />
-      {/* Deck – white */}
-      <path
-        d="M16,36 Q26,22 110,20 Q178,20 204,36 Q178,52 110,52 Q26,50 16,36 Z"
-        fill="#f0f4f8"
-      />
-      {/* Gold racing stripe */}
-      <path
-        d="M16,36 C50,33 80,32 110,32 C140,32 178,33 204,36 C178,39 140,40 110,40 C80,40 50,39 16,36 Z"
-        fill="#c9a84c"
-        opacity="0.85"
-      />
-      {/* Cabin / cockpit body */}
-      <path
-        d="M78,32 Q90,22 130,22 Q150,22 158,32 Q150,38 130,38 Q90,38 78,32 Z"
-        fill="#1a3a5c"
-        stroke="#2d5a8e"
-        strokeWidth="0.5"
-      />
-      {/* Windshield – tinted blue glass */}
-      <path
-        d="M82,32 Q92,24 128,24 Q146,24 154,32 Z"
-        fill="#4cc9f0"
-        opacity="0.35"
-      />
-      <path
-        d="M82,32 Q92,24 128,24 Q146,24 154,32"
-        fill="none"
-        stroke="#90e0ef"
-        strokeWidth="0.9"
-        opacity="0.8"
-      />
-      {/* Cabin side windows */}
-      <rect x="86" y="33" width="12" height="4" rx="2" fill="#4cc9f0" opacity="0.5" />
-      <rect x="102" y="33" width="12" height="4" rx="2" fill="#4cc9f0" opacity="0.5" />
-      <rect x="140" y="33" width="10" height="4" rx="2" fill="#4cc9f0" opacity="0.5" />
-      {/* Engine pods at stern */}
-      <rect x="202" y="28" width="14" height="16" rx="4" fill="#0d1b2a" />
-      <rect x="204" y="30" width="10" height="5" rx="2" fill="#2d5a8e" />
-      <rect x="204" y="37" width="10" height="5" rx="2" fill="#2d5a8e" />
-      {/* Bow chrome detail */}
-      <circle cx="10" cy="36" r="3.5" fill="#c9a84c" />
-      <circle cx="10" cy="36" r="1.5" fill="#fff8e1" />
-      {/* Flag */}
-      <line x1="118" y1="12" x2="118" y2="22" stroke="#c9a84c" strokeWidth="1" />
-      <path d="M118,12 L128,16 L118,20 Z" fill="#00356b" />
-      {/* Wake lines behind boat */}
-      <path
-        d="M6,33 Q-30,30 -70,32"
-        stroke="rgba(255,255,255,0.45)"
-        strokeWidth="2"
-        fill="none"
-        strokeDasharray="6 4"
-      />
-      <path
-        d="M6,39 Q-30,42 -70,40"
-        stroke="rgba(255,255,255,0.35)"
-        strokeWidth="1.5"
-        fill="none"
-        strokeDasharray="5 5"
-      />
-      <path
-        d="M6,36 Q-30,36 -70,36"
-        stroke="rgba(255,255,255,0.2)"
-        strokeWidth="1"
-        fill="none"
-        strokeDasharray="3 7"
-      />
-    </svg>
-  );
-}
+const WAVE_LINES = [
+  { top: "38%", dur: "11s", delay: "0s",   opacity: 0.09, rev: false },
+  { top: "46%", dur: "8s",  delay: "2.2s", opacity: 0.12, rev: true  },
+  { top: "54%", dur: "14s", delay: "0.8s", opacity: 0.07, rev: false },
+  { top: "61%", dur: "9s",  delay: "3.5s", opacity: 0.1,  rev: true  },
+  { top: "69%", dur: "7s",  delay: "1.2s", opacity: 0.11, rev: false },
+  { top: "76%", dur: "12s", delay: "0.4s", opacity: 0.08, rev: true  },
+  { top: "83%", dur: "6.5s",delay: "2s",   opacity: 0.09, rev: false },
+];
 
-// ── SVG: Islands ──
-function IslandAbout() {
-  return (
-    <svg viewBox="0 0 180 130" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <ellipse cx="90" cy="95" rx="80" ry="24" fill="rgba(72,202,228,0.18)" />
-      <ellipse cx="90" cy="90" rx="65" ry="20" fill="#f4e4c1" />
-      <ellipse cx="88" cy="82" rx="50" ry="16" fill="#40916c" />
-      <ellipse cx="80" cy="78" rx="9" ry="6" fill="#6d6d6d" opacity="0.6" />
-      <ellipse cx="100" cy="76" rx="6" ry="4" fill="#6d6d6d" opacity="0.5" />
-      {/* Palm 1 */}
-      <line x1="84" y1="80" x2="77" y2="48" stroke="#6d4c41" strokeWidth="2.5" strokeLinecap="round" />
-      <ellipse cx="72" cy="48" rx="15" ry="6" fill="#2d6a4f" transform="rotate(-28 72 48)" />
-      <ellipse cx="78" cy="44" rx="13" ry="5" fill="#52b788" transform="rotate(8 78 44)" />
-      <ellipse cx="73" cy="39" rx="11" ry="4" fill="#74c69d" transform="rotate(-12 73 39)" />
-      {/* Palm 2 */}
-      <line x1="95" y1="80" x2="103" y2="52" stroke="#5d4037" strokeWidth="2" strokeLinecap="round" />
-      <ellipse cx="107" cy="52" rx="12" ry="5" fill="#2d6a4f" transform="rotate(22 107 52)" />
-      <ellipse cx="101" cy="48" rx="10" ry="4" fill="#52b788" transform="rotate(-8 101 48)" />
-      {/* Flowers */}
-      <circle cx="87" cy="82" r="2" fill="#ffd166" />
-      <circle cx="79" cy="83" r="1.5" fill="#ffd166" />
-      <circle cx="94" cy="83" r="1.5" fill="#f4a261" />
-      {/* Light rays */}
-      <line x1="88" y1="20" x2="88" y2="35" stroke="#ffd166" strokeWidth="1.2" opacity="0.4" />
-      <line x1="76" y1="23" x2="79" y2="36" stroke="#ffd166" strokeWidth="0.8" opacity="0.3" />
-      <line x1="100" y1="23" x2="97" y2="36" stroke="#ffd166" strokeWidth="0.8" opacity="0.3" />
-    </svg>
-  );
-}
+// ── Case study data ──────────────────────────────────────────────────
+const CASE_STUDIES = [
+  {
+    id: "dashboard",
+    title: "Seattle Student Housing\nAsset Management Dashboard",
+    type: "Asset Management · Operations",
+    status: "Confidential",
+    problem:
+      "Two co-managed Seattle multifamily properties — combined 111 units — lacked unified operating dashboards to track KPIs, identify leakage, and support asset management decisions.",
+    outputs: [
+      "KPI bridges from current → signed-lease adjusted → stabilized 95% occupancy across both properties",
+      "RUBs utility leakage analysis identifying $20.6K+ in annual unrecovered utility costs",
+      "Expense ratio benchmarking, GL coding reconciliation, and advertising lead attribution",
+      "30/60/90-day implementation tracker across 8 operational categories",
+    ],
+    metrics: [
+      { v: "111",   l: "Combined Units"   },
+      { v: "~49%",  l: "Current Exp. Ratio" },
+      { v: "~35%",  l: "Normalized Ratio" },
+      { v: "$20.6K",l: "RUBs Leakage"    },
+    ],
+    skills: ["Asset Management","NOI Analysis","Excel Modeling","Expense Benchmarking","RUBs Analysis","Dashboard Design"],
+  },
+  {
+    id: "munson",
+    title: "110 Munson St.\nNew Haven Development Pitch",
+    type: "Development Underwriting · Investment Memo",
+    status: "Public",
+    problem:
+      "A 2.04-acre infill site in New Haven, CT — RH-2 zoned and priced at $2M — presented a potential mixed-use development opportunity directly across from Winchester Lofts, near Yale.",
+    outputs: [
+      "Zoning analysis (RH-2 development by right), maximum buildable FAR, and site program design",
+      "Recommended 185-unit mixed-use structure: 85 studios, 90 one-bedrooms, 10 two-bedrooms + 15% NNN commercial",
+      "Full pro forma reaching 7.52% yield on cost — 2.02% spread over 5.50% exit cap",
+      "Projected ~$18.8M sale profit after stabilization at market rents",
+    ],
+    metrics: [
+      { v: "7.52%",  l: "Yield on Cost"    },
+      { v: "2.02%",  l: "Dev. Spread"      },
+      { v: "$18.8M", l: "Projected Profit" },
+      { v: "185",    l: "Proposed Units"   },
+    ],
+    skills: ["Development Underwriting","Zoning Analysis","Pro Forma Modeling","Rent Comps","Unit Mix Strategy","Yield on Cost"],
+  },
+  {
+    id: "wesco",
+    title: "WESCO International\nPublic Equity Investment Thesis",
+    type: "Public Equity Research · Investment Pitch",
+    status: "Public",
+    problem:
+      "WESCO International (WCC) — a $22B electrical distribution company — traded at a discount to industrial peers despite structural tailwinds across three revenue segments and a transformative acquisition.",
+    outputs: [
+      "BUY recommendation driven by AI/data center buildout, electrification, and infrastructure spending tailwinds",
+      "Revenue segmentation analysis across EES, Communications & Security, and Utility & Broadband lines",
+      "Comparable company analysis identifying meaningful P/E discount vs. industrial distribution peers",
+      "Catalyst and risk framework: Ascent integration leverage, tariff exposure, debt structure, and cybersecurity",
+    ],
+    metrics: [
+      { v: "BUY",  l: "Recommendation"  },
+      { v: "3",    l: "Revenue Segments"},
+      { v: "$22B", l: "Market Context"  },
+      { v: "P/E↓", l: "Discount Thesis" },
+    ],
+    skills: ["Equity Research","DCF Analysis","Comparable Analysis","Industry Analysis","Investment Writing","Catalyst Identification"],
+  },
+  {
+    id: "annex",
+    title: "New Haven Annex Club\nMembership & Revenue Strategy",
+    type: "Nonprofit Consulting · Revenue Analysis",
+    status: "Public",
+    problem:
+      "The New Haven Annex Club faced stagnating membership, rising operating costs, and structural over-reliance on rental revenue — creating long-term fragility in its operating model.",
+    outputs: [
+      "Revenue composition breakdown identifying rental revenue as ~60–70% of total — a single-source fragility",
+      "Recommended diversification toward 30–50% membership-driven revenue mix",
+      "Proposed agent network expansion, brand refresh, Instagram launch, community events, and guest-pass program",
+      "2026 quarterly implementation roadmap presented to and approved by club executives",
+    ],
+    metrics: [
+      { v: "20%",     l: "Revenue Growth Target" },
+      { v: "30–50%",  l: "Membership Mix Goal"   },
+      { v: "FY2026",  l: "Roadmap Approved"       },
+      { v: "6",       l: "Revenue Streams Mapped" },
+    ],
+    skills: ["Nonprofit Consulting","Revenue Analysis","Cost Analysis","Marketing Strategy","Executive Presentation","Implementation Planning"],
+  },
+  {
+    id: "legal",
+    title: "Legal Aid Society\nHomeless Rights Project",
+    type: "Legal Advocacy · Housing Justice",
+    status: "Public",
+    problem:
+      "Homeless clients in New York City face compounding barriers — fragmented shelter records, unclear eligibility standards, and agency communication failures — that block stable housing access.",
+    outputs: [
+      "Supported 5+ clients through housing navigation, advocacy correspondence, and case documentation",
+      "Researched NYC shelter access protocols, housing eligibility criteria, and public benefits law",
+      "Drafted advocacy letters to housing providers, shelters, and government agencies on behalf of clients",
+      "Coordinated intake and documented housing needs for clients facing domestic instability and urgent placement",
+    ],
+    metrics: null,
+    skills: ["Client Advocacy","Legal Research","Case Documentation","Housing Navigation","Policy Research","Advocacy Writing"],
+  },
+  {
+    id: "mathmasers",
+    title: "Math Masters\nFounder & Platform Builder",
+    type: "EdTech · Founder · Social Impact",
+    status: "Public",
+    problem:
+      "Algebra I failure rates in Pierce County schools were driven partly by disengagement — students lacked structured, motivating resources outside the classroom.",
+    outputs: [
+      "Built a gamified Algebra I curriculum that turned abstract concepts into structured, competitive challenges",
+      "Led a 12-person team and scaled outreach to 4 high schools and 1 community college",
+      "Engaged 500+ students across Pierce County in active math programming",
+      "Awarded $20,000 Milton Fisher Scholarship for Innovation — validating community impact and model viability",
+    ],
+    metrics: [
+      { v: "500+", l: "Students Reached"  },
+      { v: "12",   l: "Team Members"      },
+      { v: "$20K", l: "Milton Fisher Award"},
+      { v: "5",    l: "Schools Reached"   },
+    ],
+    skills: ["Founder","Team Leadership","Curriculum Design","Outreach","Product Thinking","Education Technology"],
+  },
+];
 
-function IslandEducation() {
-  return (
-    <svg viewBox="0 0 200 150" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <ellipse cx="100" cy="112" rx="88" ry="26" fill="rgba(72,202,228,0.15)" />
-      <ellipse cx="100" cy="106" rx="72" ry="22" fill="#e8d5b0" />
-      <ellipse cx="100" cy="97" rx="56" ry="18" fill="#2d6a4f" />
-      {/* Building – Yale */}
-      <rect x="68" y="60" width="64" height="40" rx="2" fill="#00356b" />
-      <path d="M60,64 L100,42 L140,64 Z" fill="#002855" />
-      {/* Windows */}
-      <rect x="74" y="66" width="14" height="10" rx="1" fill="#90cdf4" opacity="0.7" />
-      <rect x="93" y="66" width="14" height="10" rx="1" fill="#90cdf4" opacity="0.7" />
-      <rect x="112" y="66" width="14" height="10" rx="1" fill="#90cdf4" opacity="0.7" />
-      {/* Door */}
-      <rect x="88" y="78" width="24" height="22" rx="2" fill="#c9a84c" />
-      <rect x="90" y="80" width="9" height="18" rx="1" fill="#8b6914" />
-      <rect x="101" y="80" width="9" height="18" rx="1" fill="#8b6914" />
-      {/* Columns */}
-      {[76, 88, 100, 112, 124].map((x) => (
-        <rect key={x} x={x} y="60" width="3" height="40" rx="1" fill="rgba(255,255,255,0.15)" />
-      ))}
-      {/* Steps */}
-      <rect x="62" y="100" width="76" height="3" rx="0" fill="rgba(255,255,255,0.3)" />
-      <rect x="60" y="103" width="80" height="3" rx="0" fill="rgba(255,255,255,0.2)" />
-      {/* Flag */}
-      <line x1="100" y1="28" x2="100" y2="43" stroke="#c9a84c" strokeWidth="1.5" />
-      <path d="M100,28 L116,34 L100,40 Z" fill="#00356b" stroke="#c9a84c" strokeWidth="0.5" />
-      {/* Trees */}
-      <path d="M50,96 L57,76 L64,96 Z" fill="#1b4332" />
-      <path d="M136,96 L143,78 L150,96 Z" fill="#1b4332" />
-    </svg>
-  );
-}
+// ── Experience data ──────────────────────────────────────────────────
+const EXPERIENCE = [
+  {
+    org:    "Nordic Partners Investments",
+    role:   "Syndication Asset Management Intern",
+    loc:    "Seattle, WA",
+    date:   "May – July 2026",
+    bullets: [
+      "Underwrote value-add multifamily acquisitions — modeling debt structures, DSCR, exit cap scenarios, and GP fee structures to support offer pricing on deals up to $20M.",
+      "Ran acquisition pricing scenarios and rent comp analyses across the Seattle submarket, benchmarking against light-renovation theses to validate ROI assumptions.",
+      "Built an AI-enabled tool that parses property financials, generates 30/60/90-day action plans, and stores data for performance visualization — streamlining quarterly asset management reporting.",
+      "Developed the Seattle Student Housing AM Dashboard for two co-managed properties, mapping KPIs, reconciling GL data, and identifying $20.6K in annual RUBs leakage.",
+    ],
+  },
+  {
+    org:    "Urban Philanthropic Fund",
+    role:   "Analyst",
+    loc:    "New Haven, CT",
+    date:   "Sept 2025 – Present",
+    bullets: [
+      "Conducted equity valuations including UnitedHealth Group (UNH), building DCF and comparable analysis models to support investment committee decisions.",
+      "Researched public company fundamentals, market positioning, and sector dynamics across UPF's portfolio.",
+      "Helped deploy capital where investment returns are redistributed as grants back to the New Haven community — aligning financial performance with public benefit.",
+    ],
+  },
+  {
+    org:    "Urban Philanthropic Consulting",
+    role:   "Head of Consulting",
+    loc:    "New Haven, CT",
+    date:   "Sept 2025 – Present",
+    bullets: [
+      "Led the New Haven Annex Club engagement: revenue analysis, cost benchmarking, marketing strategy, and executive presentation resulting in an approved FY 2026 implementation roadmap.",
+      "Built a financial model projecting client cash flows to enhance decision-making and identify a 20% revenue growth opportunity.",
+      "Conducted market research and proposed improvements across advertising, membership, and programming that were adopted for implementation.",
+    ],
+  },
+  {
+    org:    "Legal Aid Society — Homeless Rights Project",
+    role:   "Legal Advocacy Intern",
+    loc:    "New York, NY",
+    date:   "2025 – 2026",
+    bullets: [
+      "Supported 5+ homeless clients through housing navigation, advocacy correspondence, and case documentation.",
+      "Researched NYC shelter access, housing eligibility, public benefits law, and homelessness policy to assist supervising attorneys.",
+      "Drafted advocacy letters to housing providers, shelters, and government agencies to address barriers blocking stable housing.",
+    ],
+  },
+  {
+    org:    "Yale Student Association for Small Claims Assistance",
+    role:   "Treasurer",
+    loc:    "New Haven, CT",
+    date:   "Dec 2025 – Present",
+    bullets: [
+      "Aid Connecticut residents navigating small claims court — reducing the legal information asymmetry that disadvantages unrepresented litigants.",
+      "Mastered CT small claims procedure, eligibility thresholds, filing requirements, and judgment enforcement.",
+      "Manage organizational finances and coordinate member resources for client intake sessions.",
+    ],
+  },
+  {
+    org:    "Math Masters",
+    role:   "Founder & President",
+    loc:    "University Place, WA",
+    date:   "Aug 2023 – 2025",
+    bullets: [
+      "Founded and built a gamified Algebra I learning platform — identified the problem, designed the curriculum, recruited a 12-person team, and scaled to 500+ students.",
+      "Networked across 4 high schools and 1 community college in Pierce County to build sustained programming.",
+      "Awarded $20,000 Milton Fisher Scholarship for Innovation, validating the model's design and community impact.",
+    ],
+  },
+  {
+    org:    "P. Fluorescens Genome Research",
+    role:   "Research Assistant",
+    loc:    "Tacoma, WA",
+    date:   "Jan – May 2025",
+    bullets: [
+      "Leveraged CRISPR-based techniques to investigate Pseudomonas fluorescens, identifying DNA sequences that suppress a wheat-killing fungal pathogen.",
+      "Conducted gene-level analysis to identify sequences increasing DAPG suppressant production — a key antifungal compound with crop protection applications.",
+      "Developed technical documentation and contributed findings to ongoing lab research on biological crop protection.",
+    ],
+  },
+];
 
-function IslandExperience() {
-  return (
-    <svg viewBox="0 0 220 160" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <ellipse cx="110" cy="122" rx="98" ry="28" fill="rgba(72,202,228,0.15)" />
-      <ellipse cx="110" cy="115" rx="80" ry="24" fill="#d4b896" />
-      <ellipse cx="110" cy="105" rx="64" ry="20" fill="#374151" />
-      {/* Main tower */}
-      <rect x="84" y="52" width="52" height="56" rx="3" fill="#1f2937" />
-      <rect x="88" y="56" width="44" height="48" rx="2" fill="#374151" />
-      {/* Windows */}
-      {[60, 72, 84].map((y) =>
-        [93, 105, 117].map((x) => (
-          <rect key={`${x}-${y}`} x={x} y={y} width="9" height="7" rx="1" fill="#93c5fd" opacity="0.7" />
-        ))
-      )}
-      {/* Crane / mast */}
-      <line x1="110" y1="24" x2="110" y2="52" stroke="#c9a84c" strokeWidth="2" />
-      <line x1="95" y1="30" x2="125" y2="30" stroke="#c9a84c" strokeWidth="1.5" />
-      <line x1="110" y1="30" x2="110" y2="52" stroke="#c9a84c" strokeWidth="1.5" />
-      {/* Dock */}
-      <rect x="150" y="103" width="55" height="8" rx="2" fill="#78350f" />
-      {[155, 165, 175, 185, 195].map((x) => (
-        <line key={x} x1={x} y1="111" x2={x} y2="124" stroke="#92400e" strokeWidth="2.5" />
-      ))}
-      {/* Small boat at dock */}
-      <path d="M152,108 Q165,104 178,104 Q183,104 183,108 Q165,112 152,108 Z" fill="#1e3a5f" />
-      <line x1="165" y1="96" x2="165" y2="104" stroke="#c9a84c" strokeWidth="1" />
-      {/* Lamp post */}
-      <line x1="30" y1="72" x2="30" y2="105" stroke="#9ca3af" strokeWidth="2" />
-      <circle cx="30" cy="68" r="6" fill="#ffd166" opacity="0.8" />
-      <ellipse cx="30" cy="75" rx="12" ry="5" fill="#ffd166" opacity="0.12" />
-    </svg>
-  );
-}
+// ── Skills data ──────────────────────────────────────────────────────
+const SKILL_CATEGORIES = [
+  {
+    title: "Finance & Investing",
+    skills: ["Financial Modeling","DCF Analysis","Comparable Analysis","Public Equity Research","Underwriting","Yield on Cost","Development Spread","Cap Rate Analysis","NOI Analysis","DSCR Modeling","GP Fee Structures","Valuation","Risk Assessment"],
+  },
+  {
+    title: "Real Estate",
+    skills: ["Multifamily Acquisitions","Value-Add Strategy","Asset Management","Development Underwriting","Zoning Analysis","Unit Mix Strategy","RUBs Analysis","Expense Benchmarking","Rent Comps","Pro Forma Modeling","Acquisition Pricing","Stabilization Projections"],
+  },
+  {
+    title: "Technical & Analytical",
+    skills: ["Advanced Excel","Dashboard Design","KPI Tracking","GL Reconciliation","Data Analysis","AI-Enabled Tools","Performance Visualization","Source Mapping","Financial Reporting","Process Development"],
+  },
+  {
+    title: "Legal & Advocacy",
+    skills: ["Housing Navigation","Client Intake","Advocacy Writing","Case Documentation","Small Claims Law","NYC Shelter Policy","Public Benefits Research","Legal Research","Access-to-Justice Work"],
+  },
+  {
+    title: "Consulting & Strategy",
+    skills: ["Revenue Analysis","Cost Analysis","Market Research","Implementation Roadmaps","Marketing Strategy","Nonprofit Consulting","Executive Presentations","Membership Strategy"],
+  },
+  {
+    title: "Research & Science",
+    skills: ["CRISPR Research","Genomics","Biological Systems Analysis","Technical Documentation","Scientific Writing","Lab Technique"],
+  },
+];
 
-function IslandLeadership() {
-  return (
-    <svg viewBox="0 0 200 150" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <ellipse cx="100" cy="115" rx="88" ry="26" fill="rgba(72,202,228,0.15)" />
-      <ellipse cx="100" cy="108" rx="70" ry="22" fill="#c8b59a" />
-      <ellipse cx="100" cy="99" rx="56" ry="18" fill="#166534" />
-      {/* Mountain */}
-      <path d="M62,99 L100,44 L138,99 Z" fill="#1a3a5c" />
-      <path d="M74,99 L100,58 L126,99 Z" fill="#1e40af" />
-      {/* Snow cap */}
-      <path d="M88,62 L100,44 L112,62 Q100,57 88,62 Z" fill="white" opacity="0.9" />
-      {/* Sun glow behind mountain */}
-      <circle cx="100" cy="40" r="18" fill="#ffd166" opacity="0.15" />
-      <circle cx="100" cy="40" r="10" fill="#ffd166" opacity="0.25" />
-      {/* Sun rays */}
-      {[0, 45, 90, 135, 180, 225, 270, 315].map((angle) => (
-        <line
-          key={angle}
-          x1={100 + 13 * Math.cos((angle * Math.PI) / 180)}
-          y1={40 + 13 * Math.sin((angle * Math.PI) / 180)}
-          x2={100 + 20 * Math.cos((angle * Math.PI) / 180)}
-          y2={40 + 20 * Math.sin((angle * Math.PI) / 180)}
-          stroke="#ffd166"
-          strokeWidth="1.2"
-          opacity="0.4"
-        />
-      ))}
-      {/* Trees */}
-      <path d="M44,98 L52,76 L60,98 Z" fill="#14532d" />
-      <path d="M140,98 L148,78 L156,98 Z" fill="#14532d" />
-      <path d="M52,98 L58,84 L64,98 Z" fill="#166534" />
-      <path d="M136,98 L142,86 L148,98 Z" fill="#166534" />
-    </svg>
-  );
-}
-
-function IslandContact() {
-  return (
-    <svg viewBox="0 0 220 160" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <radialGradient id="sunsetG" cx="50%" cy="35%" r="55%">
-          <stop offset="0%" stopColor="#ffd166" stopOpacity="0.35" />
-          <stop offset="100%" stopColor="transparent" stopOpacity="0" />
-        </radialGradient>
-      </defs>
-      <ellipse cx="110" cy="50" rx="90" ry="48" fill="url(#sunsetG)" />
-      <ellipse cx="110" cy="122" rx="98" ry="28" fill="rgba(72,202,228,0.2)" />
-      <ellipse cx="110" cy="115" rx="80" ry="24" fill="#f0d9a8" />
-      <ellipse cx="110" cy="106" rx="64" ry="20" fill="#2d7a4f" />
-      {/* Main dock */}
-      <rect x="50" y="103" width="120" height="10" rx="3" fill="#92400e" />
-      {[56, 68, 80, 92, 104, 116, 128, 140, 152, 162].map((x) => (
-        <line key={x} x1={x} y1="113" x2={x} y2="128" stroke="#78350f" strokeWidth="2.5" />
-      ))}
-      {/* Dock planks */}
-      {[55, 65, 75, 85, 95, 105, 115, 125, 135, 145, 155, 163].map((x) => (
-        <line key={x} x1={x} y1="104" x2={x} y2="112" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
-      ))}
-      {/* Lamp post */}
-      <line x1="88" y1="68" x2="88" y2="103" stroke="#b45309" strokeWidth="2.5" />
-      <path d="M82,68 Q88,60 94,68" fill="#b45309" />
-      <ellipse cx="88" cy="66" rx="6" ry="5" fill="#ffd166" opacity="0.9" />
-      <ellipse cx="88" cy="73" rx="14" ry="5" fill="#ffd166" opacity="0.1" />
-      {/* Second lamp */}
-      <line x1="132" y1="74" x2="132" y2="103" stroke="#b45309" strokeWidth="2" />
-      <ellipse cx="132" cy="72" rx="5" ry="4" fill="#ffd166" opacity="0.8" />
-      {/* Sun reflection trail on water */}
-      <ellipse cx="110" cy="130" rx="30" ry="6" fill="rgba(255,209,102,0.18)" />
-      {/* Small moored boat */}
-      <path d="M54,110 Q72,106 90,106 Q96,106 96,110 Q72,114 54,110 Z" fill="#1e3a5f" />
-      <line x1="72" y1="96" x2="72" y2="106" stroke="#c9a84c" strokeWidth="1" />
-      <path d="M72,96 L82,100 L72,104 Z" fill="#00356b" />
-    </svg>
-  );
-}
-
-// ── Ocean background (fixed layer) ──
+// ── Fixed ocean background ───────────────────────────────────────────
 function OceanBackground() {
   return (
-    <div className="fixed inset-0 overflow-hidden" style={{ zIndex: 0, pointerEvents: "none" }}>
-      {/* Base deep ocean gradient */}
+    <div
+      className="fixed inset-0 pointer-events-none"
+      style={{ zIndex: 0, overflow: "hidden" }}
+    >
+      {/* Base gradient */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(185deg, #020b16 0%, #040e1a 8%, #071e3d 20%, #0a2a52 32%, #0d3b6e 46%, #0077b6 62%, #0096c7 74%, #00b4d8 84%, #48cae4 93%, #90e0ef 100%)",
+            "linear-gradient(185deg, #020610 0%, #04091a 10%, #070f22 22%, #0B1E33 42%, #0d2740 58%, #0a1e32 76%, #06111f 90%, #030810 100%)",
         }}
       />
-
       {/* Horizon glow */}
       <div
-        className="absolute"
+        className="absolute left-0 right-0"
         style={{
-          top: "18%",
-          left: 0,
-          right: 0,
-          height: "120px",
+          top: "22%",
+          height: "140px",
           background:
-            "linear-gradient(180deg, transparent, rgba(201,168,76,0.06), transparent)",
+            "radial-gradient(ellipse 80% 100% at 50% 50%, rgba(31,166,166,0.04) 0%, transparent 100%)",
         }}
       />
-
       {/* Stars */}
-      <div className="absolute top-0 left-0 right-0" style={{ height: "28%" }}>
+      <div className="absolute top-0 left-0 right-0" style={{ height: "50%" }}>
         {STARS.map((s) => (
           <div
             key={s.id}
             className="absolute rounded-full bg-white"
             style={{
-              left: `${s.x}%`,
-              top: `${s.y}%`,
-              width: `${s.size}px`,
-              height: `${s.size}px`,
-              opacity: s.opacity,
-              animation: `twinkle ${s.dur}s ease-in-out infinite`,
-              animationDelay: `${s.delay}s`,
+              left:             `${s.x}%`,
+              top:              `${s.y}%`,
+              width:            `${s.size}px`,
+              height:           `${s.size}px`,
+              opacity:          s.opacity,
+              animation:        `twinkle ${s.dur}s ease-in-out infinite`,
+              animationDelay:   `${s.delay}s`,
             }}
           />
         ))}
       </div>
-
       {/* Moon */}
       <div
         className="absolute rounded-full"
         style={{
-          top: "6%",
-          right: "12%",
-          width: "42px",
-          height: "42px",
-          background: "radial-gradient(circle at 35% 35%, #fffde7, #ffd54f)",
-          boxShadow: "0 0 30px rgba(255,213,79,0.25), 0 0 60px rgba(255,213,79,0.1)",
+          top:        "5%",
+          right:      "8%",
+          width:      "38px",
+          height:     "38px",
+          background: "radial-gradient(circle at 38% 38%, #fffde7, #ffd54f 60%, #ffb300)",
+          boxShadow:  "0 0 30px rgba(255,213,79,0.2), 0 0 70px rgba(255,213,79,0.08)",
         }}
       />
-
       {/* Wave lines */}
-      {[
-        { top: "34%", dur: "11s", delay: "0s", opacity: 0.07 },
-        { top: "42%", dur: "8s",  delay: "2s", opacity: 0.09 },
-        { top: "50%", dur: "13s", delay: "1s", opacity: 0.06 },
-        { top: "58%", dur: "9s",  delay: "3s", opacity: 0.08 },
-        { top: "66%", dur: "7s",  delay: "0.5s", opacity: 0.1 },
-        { top: "74%", dur: "12s", delay: "2.5s", opacity: 0.07 },
-        { top: "82%", dur: "6s",  delay: "1.5s", opacity: 0.09 },
-      ].map((w, i) => (
+      {WAVE_LINES.map((w, i) => (
         <div
           key={i}
-          className="absolute w-full"
+          className="wave-line"
           style={{
-            top: w.top,
-            height: "2px",
-            background: `linear-gradient(90deg, transparent 0%, rgba(255,255,255,${w.opacity}) 20%, rgba(255,255,255,${w.opacity * 1.3}) 50%, rgba(255,255,255,${w.opacity}) 80%, transparent 100%)`,
-            animation: `waveMove ${w.dur} ease-in-out infinite${i % 2 === 0 ? " reverse" : ""}`,
-            animationDelay: w.delay,
-          }}
+            top:       w.top,
+            "--dur":   w.dur,
+            "--delay": w.delay,
+            opacity:   w.opacity,
+            animationDirection: w.rev ? "reverse" : "normal",
+          } as React.CSSProperties}
         />
       ))}
-
       {/* Water shimmer pools */}
       <div
-        className="absolute rounded-full animate-shimmer"
+        className="absolute rounded-full"
         style={{
-          top: "38%",
-          left: "8%",
-          width: "280px",
-          height: "160px",
-          background:
-            "radial-gradient(ellipse, rgba(255,255,255,0.04) 0%, transparent 70%)",
+          top:        "42%",
+          left:       "5%",
+          width:      "320px",
+          height:     "180px",
+          background: "radial-gradient(ellipse, rgba(255,255,255,0.025) 0%, transparent 70%)",
+          animation:  "gentleFloat 18s ease-in-out infinite",
         }}
       />
       <div
-        className="absolute rounded-full animate-shimmer-alt"
+        className="absolute rounded-full"
         style={{
-          top: "55%",
-          right: "10%",
-          width: "360px",
-          height: "200px",
-          background:
-            "radial-gradient(ellipse, rgba(0,180,216,0.06) 0%, transparent 70%)",
+          top:        "60%",
+          right:      "8%",
+          width:      "400px",
+          height:     "220px",
+          background: "radial-gradient(ellipse, rgba(31,166,166,0.04) 0%, transparent 70%)",
+          animation:  "gentleFloat 24s ease-in-out infinite reverse",
         }}
       />
-      <div
-        className="absolute rounded-full animate-shimmer"
-        style={{
-          top: "70%",
-          left: "40%",
-          width: "320px",
-          height: "180px",
-          background:
-            "radial-gradient(ellipse, rgba(255,255,255,0.03) 0%, transparent 70%)",
-          animationDelay: "6s",
-        }}
-      />
-
-      {/* Nautical route SVG line */}
-      <svg
-        className="absolute inset-0 w-full h-full"
-        style={{ opacity: 0.06 }}
-        preserveAspectRatio="none"
-      >
-        <path
-          d="M -5% 36% Q 25% 33% 55% 38% Q 75% 42% 105% 36%"
-          fill="none"
-          stroke="rgba(201,168,76,1)"
-          strokeWidth="1.5"
-          strokeDasharray="8 6"
-        />
-      </svg>
     </div>
   );
 }
 
-// ── Fixed Nav ──
-function Nav({ scrollY }: { scrollY: number }) {
-  const [open, setOpen] = useState(false);
-  const opaque = scrollY > 60;
-
-  const links = [
-    { label: "About",      href: "#about" },
-    { label: "Education",  href: "#education" },
-    { label: "Experience", href: "#experience" },
-    { label: "Leadership", href: "#leadership" },
-    { label: "Skills",     href: "#skills" },
-    { label: "Contact",    href: "#contact" },
-  ];
-
+// ── Utility section helpers ──────────────────────────────────────────
+function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <nav
-      className="fixed top-0 left-0 right-0 z-50 transition-all duration-500"
-      style={{
-        background: opaque
-          ? "rgba(4,13,26,0.85)"
-          : "transparent",
-        backdropFilter: opaque ? "blur(16px)" : "none",
-        borderBottom: opaque ? "1px solid rgba(144,224,239,0.1)" : "none",
-      }}
-    >
-      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        {/* Logo */}
-        <a
-          href="#about"
-          className="flex items-center gap-2.5 text-white font-bold text-lg tracking-wide"
-        >
-          <div
-            className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-black"
-            style={{
-              background: "linear-gradient(135deg, #c9a84c, #e8c96a)",
-              color: "#040d1a",
-            }}
-          >
-            BN
-          </div>
-          <span style={{ color: "#e2e8f0", letterSpacing: "0.05em" }}>
-            Brandon<span style={{ color: "#c9a84c" }}>.</span>
-          </span>
-        </a>
-
-        {/* Desktop links */}
-        <div className="hidden md:flex items-center gap-7">
-          {links.map((l) => (
-            <a
-              key={l.href}
-              href={l.href}
-              className="text-sm font-medium transition-colors duration-200"
-              style={{ color: "rgba(226,232,240,0.7)" }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.color = "#c9a84c")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.color = "rgba(226,232,240,0.7)")
-              }
-            >
-              {l.label}
-            </a>
-          ))}
-          <a href="mailto:B.nguyen@yale.edu" className="btn-ocean text-sm">
-            Contact
-          </a>
-        </div>
-
-        {/* Mobile hamburger */}
-        <button
-          onClick={() => setOpen(!open)}
-          className="md:hidden text-white"
-          aria-label="menu"
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            {open ? (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            ) : (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            )}
-          </svg>
-        </button>
-      </div>
-
-      {open && (
-        <div
-          className="md:hidden px-6 pb-5 flex flex-col gap-4"
-          style={{ background: "rgba(4,13,26,0.95)", backdropFilter: "blur(16px)" }}
-        >
-          {links.map((l) => (
-            <a
-              key={l.href}
-              href={l.href}
-              onClick={() => setOpen(false)}
-              className="text-sm"
-              style={{ color: "rgba(226,232,240,0.8)" }}
-            >
-              {l.label}
-            </a>
-          ))}
-        </div>
-      )}
-    </nav>
-  );
-}
-
-// ── Section header ──
-function SectionTitle({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex items-center gap-4 mb-12">
-      <div className="w-8 h-0.5" style={{ background: "#c9a84c" }} />
-      <h2
-        className="text-xs font-bold uppercase tracking-[0.25em]"
-        style={{ color: "#c9a84c" }}
-      >
-        {children}
-      </h2>
-      <div className="flex-1 h-px" style={{ background: "rgba(144,224,239,0.15)" }} />
+    <div className="section-label">
+      <span>{children as string}</span>
     </div>
   );
 }
 
-// ── Badge ──
-function Badge({ children }: { children: React.ReactNode }) {
-  return (
-    <span
-      className="inline-block text-xs font-medium px-2.5 py-1 rounded-full"
-      style={{
-        background: "rgba(0,180,216,0.12)",
-        border: "1px solid rgba(0,180,216,0.25)",
-        color: "#90e0ef",
-      }}
-    >
-      {children}
-    </span>
-  );
-}
-
-// ── Bullet point ──
 function Bullet({ children }: { children: React.ReactNode }) {
   return (
-    <li className="flex gap-3 text-sm leading-relaxed" style={{ color: "rgba(203,213,225,0.85)" }}>
-      <span className="mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: "#c9a84c" }} />
+    <li className="flex gap-3 text-sm leading-relaxed" style={{ color: "var(--text-2)" }}>
+      <span
+        className="mt-2 flex-shrink-0 w-1 h-1 rounded-full"
+        style={{ background: "var(--gold)" }}
+      />
       {children}
     </li>
   );
 }
 
-// ═══════════════════════════════════════════
-//  MAIN PAGE
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+//  HOME PAGE
+// ═══════════════════════════════════════════════════════
 export default function Home() {
-  const boatRef   = useRef<HTMLDivElement>(null);
-  const heroRef   = useRef<HTMLDivElement>(null);
-  const [scrollY, setScrollY] = useState(0);
-  const [boatDir, setBoatDir] = useState<1 | -1>(1);
-
+  // Reveal on scroll
   useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-
-    const boat = boatRef.current;
-    if (!boat) return;
-
-    // Boat journey across the page
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: document.documentElement,
-        start: "top top",
-        end: "bottom bottom",
-        scrub: 2,
+    const els = document.querySelectorAll(".reveal");
+    const obs = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            e.target.classList.add("in");
+            obs.unobserve(e.target);
+          }
+        });
       },
-    });
-
-    tl.to(boat, { x: "78vw", duration: 3, ease: "none",
-        onUpdate() { setBoatDir(1); } })
-      .to(boat, { x: "5vw",  duration: 2.5, ease: "none",
-        onUpdate() { setBoatDir(-1); } })
-      .to(boat, { x: "85vw", duration: 3, ease: "none",
-        onUpdate() { setBoatDir(1); } })
-      .to(boat, { x: "30vw", duration: 2, ease: "none",
-        onUpdate() { setBoatDir(-1); } });
-
-    // Subtle Y drift for realism
-    gsap.to(boat, {
-      y: "+=6",
-      duration: 4,
-      ease: "sine.inOut",
-      yoyo: true,
-      repeat: -1,
-    });
-
-    // Section reveal on scroll
-    const reveals = document.querySelectorAll(".reveal");
-    reveals.forEach((el) => {
-      ScrollTrigger.create({
-        trigger: el,
-        start: "top 85%",
-        onEnter: () => el.classList.add("visible"),
-      });
-    });
-
-    // Scroll Y tracker
-    const onScroll = () => setScrollY(window.scrollY);
-    window.addEventListener("scroll", onScroll, { passive: true });
-
-    return () => {
-      ScrollTrigger.getAll().forEach((t) => t.kill());
-      window.removeEventListener("scroll", onScroll);
-    };
+      { threshold: 0.08 }
+    );
+    els.forEach((el) => obs.observe(el));
+    return () => obs.disconnect();
   }, []);
 
   return (
-    <div className="relative" style={{ color: "#e2e8f0" }}>
-      {/* ── Fixed ocean background ── */}
+    <div style={{ position: "relative", minHeight: "100vh" }}>
       <OceanBackground />
+      <OceanNav />
 
-      {/* ── Fixed boat layer ── */}
-      <div
-        className="fixed z-10 pointer-events-none"
-        style={{ top: "32%", left: "2vw", width: "180px" }}
-      >
-        <div ref={boatRef} className="relative animate-boat-bob">
-          <BoatSVG dir={boatDir} />
-          {/* Foam wake ring under boat */}
-          <div
-            className="absolute rounded-full"
-            style={{
-              width: "200px",
-              height: "28px",
-              bottom: "-8px",
-              left: "-12px",
-              background:
-                "radial-gradient(ellipse, rgba(255,255,255,0.14) 0%, transparent 70%)",
-              filter: "blur(4px)",
-            }}
-          />
-        </div>
-      </div>
+      <main style={{ position: "relative", zIndex: 5, paddingTop: "56px" }}>
 
-      {/* ── Scroll content ── */}
-      <div className="relative" style={{ zIndex: 5 }}>
-
-        {/* ══════════════════════════════
+        {/* ══════════════════════════════════════════
             HERO
-        ══════════════════════════════ */}
-        <Nav scrollY={scrollY} />
-
+        ══════════════════════════════════════════ */}
         <section
-          id="about"
-          ref={heroRef}
-          className="relative min-h-screen flex items-center"
-          style={{ paddingTop: "80px" }}
+          id="hero"
+          style={{ minHeight: "100vh", display: "flex", alignItems: "center" }}
         >
-          {/* Island decoration */}
           <div
-            className="absolute right-8 bottom-16 opacity-60 hidden lg:block animate-float"
-            style={{ width: "160px", animationDelay: "1s" }}
+            className="max-w-7xl mx-auto px-6 w-full"
+            style={{ paddingTop: "80px", paddingBottom: "80px" }}
           >
-            <IslandAbout />
-          </div>
-
-          <div className="max-w-7xl mx-auto px-6 py-20 grid lg:grid-cols-2 gap-16 items-center w-full">
-            {/* Text */}
-            <div>
-              <div className="flex items-center gap-3 mb-6">
+            <div className="grid lg:grid-cols-2 gap-16 items-center">
+              {/* Text */}
+              <div>
                 <div
-                  className="h-px flex-shrink-0"
-                  style={{ width: "32px", background: "#c9a84c" }}
-                />
-                <span
-                  className="text-xs font-semibold uppercase tracking-[0.22em]"
-                  style={{ color: "#c9a84c" }}
+                  className="flex items-center gap-3 mb-8"
+                  style={{ opacity: 0.8 }}
                 >
-                  Yale University · Class of 2029
-                </span>
-              </div>
-
-              <h1
-                className="font-bold leading-tight mb-6"
-                style={{
-                  fontSize: "clamp(3rem,6vw,5.5rem)",
-                  color: "#f8fafc",
-                  textShadow: "0 4px 24px rgba(0,0,0,0.5)",
-                }}
-              >
-                Brandon
-                <br />
-                <span style={{ color: "#c9a84c" }}>Luu Nguyen</span>
-              </h1>
-
-              <p
-                className="text-lg leading-relaxed mb-8 max-w-xl"
-                style={{ color: "rgba(203,213,225,0.85)" }}
-              >
-                Investor, researcher, and founder — navigating the intersection of
-                economics, science, and community impact. Valedictorian turned Yale
-                analyst, driven by precision and purpose.
-              </p>
-
-              {/* Contact chips */}
-              <div className="flex flex-wrap gap-3 mb-10 text-sm" style={{ color: "rgba(203,213,225,0.7)" }}>
-                {[
-                  { icon: "📍", text: "Tacoma, WA" },
-                  { icon: "✉️", text: "B.nguyen@yale.edu" },
-                  { icon: "📱", text: "(253) 240-5196" },
-                ].map((c) => (
+                  <div
+                    style={{ width: "28px", height: "1.5px", background: "var(--gold)", flexShrink: 0 }}
+                  />
                   <span
-                    key={c.text}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
                     style={{
-                      background: "rgba(255,255,255,0.06)",
-                      border: "1px solid rgba(255,255,255,0.1)",
+                      fontSize:      "0.68rem",
+                      fontWeight:    700,
+                      letterSpacing: "0.28em",
+                      textTransform: "uppercase",
+                      color:         "var(--gold)",
                     }}
                   >
-                    <span>{c.icon}</span>
-                    {c.text}
+                    Yale University · Class of 2029
                   </span>
-                ))}
+                </div>
+
+                <h1
+                  className="serif"
+                  style={{
+                    fontSize:    "clamp(2.8rem, 5.5vw, 5rem)",
+                    fontWeight:  600,
+                    lineHeight:  1.1,
+                    color:       "var(--text-1)",
+                    marginBottom: "1.5rem",
+                    letterSpacing: "-0.01em",
+                  }}
+                >
+                  Building at the intersection of{" "}
+                  <em style={{ color: "var(--gold)", fontStyle: "italic" }}>
+                    real estate,
+                  </em>{" "}
+                  <em style={{ color: "var(--teal)", fontStyle: "italic" }}>
+                    capital,
+                  </em>{" "}
+                  and systems.
+                </h1>
+
+                <p
+                  style={{
+                    fontSize:     "1.05rem",
+                    lineHeight:   1.8,
+                    color:        "var(--text-2)",
+                    maxWidth:     "520px",
+                    marginBottom: "2rem",
+                  }}
+                >
+                  Yale student from Tacoma — underwriting multifamily acquisitions,
+                  building asset management dashboards, researching public equities,
+                  advocating for housing access, and turning complex systems into
+                  clear decisions.
+                </p>
+
+                <div
+                  className="flex flex-wrap gap-3 mb-10"
+                  style={{ fontSize: "0.82rem", color: "var(--text-3)" }}
+                >
+                  {[
+                    { icon: "📍", t: "Tacoma, WA" },
+                    { icon: "✉", t: "B.nguyen@yale.edu" },
+                    { icon: "🎓", t: "GPA 3.93 / 4.00" },
+                  ].map((c) => (
+                    <span
+                      key={c.t}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
+                      style={{
+                        background: "rgba(255,255,255,0.04)",
+                        border:     "1px solid rgba(255,255,255,0.08)",
+                      }}
+                    >
+                      {c.icon} {c.t}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="flex flex-wrap gap-3">
+                  <a href="#work" className="btn-primary">View Work</a>
+                  <a href="#contact" className="btn-ghost">Contact Me</a>
+                  <a
+                    href="https://www.linkedin.com/in/brandon-nguyen-246tr"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-ghost"
+                    style={{ gap: "6px" }}
+                  >
+                    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                    </svg>
+                    LinkedIn
+                  </a>
+                </div>
               </div>
 
-              <div className="flex flex-wrap gap-4">
-                <a
-                  href="https://www.linkedin.com/in/brandon-nguyen-246tr"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-ocean flex items-center gap-2"
-                >
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
-                  </svg>
-                  LinkedIn
-                </a>
-                <a
-                  href="#education"
-                  className="flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold transition-all duration-300"
+              {/* Photo + stat cards */}
+              <div className="flex flex-col items-center gap-5">
+                <div
+                  className="relative rounded-2xl overflow-hidden"
                   style={{
-                    border: "1px solid rgba(144,224,239,0.3)",
-                    color: "#90e0ef",
-                    background: "rgba(0,180,216,0.06)",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = "rgba(0,180,216,0.15)";
-                    e.currentTarget.style.borderColor = "rgba(144,224,239,0.6)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = "rgba(0,180,216,0.06)";
-                    e.currentTarget.style.borderColor = "rgba(144,224,239,0.3)";
+                    width:      "260px",
+                    height:     "320px",
+                    border:     "1px solid rgba(255,255,255,0.09)",
+                    boxShadow:  "0 24px 64px rgba(0,0,0,0.65), 0 0 0 1px rgba(200,169,106,0.1)",
                   }}
                 >
-                  Explore Journey ↓
-                </a>
+                  <Image
+                    src="/profile.jpg"
+                    alt="Brandon Luu Nguyen"
+                    fill
+                    className="object-cover object-top"
+                    priority
+                    sizes="260px"
+                  />
+                  <div
+                    className="absolute bottom-0 left-0 right-0 px-4 py-3"
+                    style={{
+                      background:
+                        "linear-gradient(0deg, rgba(5,8,20,0.92) 0%, transparent 100%)",
+                    }}
+                  >
+                    <p style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--text-1)" }}>
+                      Brandon Luu Nguyen
+                    </p>
+                    <p style={{ fontSize: "0.72rem", color: "var(--gold)" }}>
+                      Yale · Economics &amp; Chemistry
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 w-full max-w-xs">
+                  {[
+                    { v: "3.93", l: "Yale GPA"       },
+                    { v: "#1",   l: "Valedictorian"   },
+                    { v: "4.00", l: "TCC GPA"         },
+                    { v: "$20K", l: "Milton Fisher"   },
+                  ].map((s) => (
+                    <div
+                      key={s.l}
+                      className="glass rounded-xl shimmer lift"
+                      style={{ textAlign: "center", padding: "14px 10px" }}
+                    >
+                      <div className="metric-value" style={{ fontSize: "1.5rem" }}>
+                        {s.v}
+                      </div>
+                      <div className="metric-label">{s.l}</div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
-            {/* Photo + stats */}
-            <div className="flex flex-col items-center gap-6">
+            {/* Scroll hint */}
+            <div
+              className="flex flex-col items-center gap-2 mt-16"
+              style={{
+                color:     "rgba(170,182,197,0.35)",
+                animation: "gentleFloat 3s ease-in-out infinite",
+              }}
+            >
+              <span style={{ fontSize: "0.6rem", letterSpacing: "0.25em", textTransform: "uppercase" }}>
+                Scroll
+              </span>
               <div
-                className="relative rounded-2xl overflow-hidden"
                 style={{
-                  width: "280px",
-                  height: "340px",
-                  border: "1px solid rgba(144,224,239,0.2)",
-                  boxShadow: "0 24px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05)",
+                  width:      "1px",
+                  height:     "36px",
+                  background: "linear-gradient(180deg, rgba(200,169,106,0.4), transparent)",
+                  borderRadius: "1px",
                 }}
-              >
-                <Image
-                  src="/profile.jpg"
-                  alt="Brandon Luu Nguyen"
-                  fill
-                  className="object-cover object-top"
-                  priority
-                  sizes="280px"
-                />
-                {/* Glass overlay at bottom */}
-                <div
-                  className="absolute bottom-0 left-0 right-0 px-4 py-3"
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* ══════════════════════════════════════════
+            ABOUT
+        ══════════════════════════════════════════ */}
+        <section id="about" style={{ paddingTop: "96px", paddingBottom: "96px" }}>
+          <div className="max-w-6xl mx-auto px-6">
+            <div className="reveal">
+              <SectionLabel>About</SectionLabel>
+            </div>
+
+            <div className="grid lg:grid-cols-5 gap-16 items-start">
+              {/* Story — spans 3 cols */}
+              <div className="lg:col-span-3 reveal">
+                <h2
+                  className="serif"
                   style={{
-                    background:
-                      "linear-gradient(0deg, rgba(4,13,26,0.9) 0%, transparent 100%)",
+                    fontSize:     "clamp(1.8rem, 3vw, 2.6rem)",
+                    fontWeight:   500,
+                    lineHeight:   1.25,
+                    color:        "var(--text-1)",
+                    marginBottom: "1.75rem",
                   }}
                 >
-                  <p className="text-sm font-semibold text-white">Brandon Luu Nguyen</p>
-                  <p className="text-xs" style={{ color: "#c9a84c" }}>
-                    Yale · Economics &amp; Chemistry
+                  I grew up in{" "}
+                  <span style={{ color: "var(--teal)" }}>Tacoma, Washington</span> —
+                  a port city where capital, real estate, and municipal systems shape
+                  everyday life.
+                </h2>
+
+                <div
+                  style={{
+                    display:       "flex",
+                    flexDirection: "column",
+                    gap:           "1.25rem",
+                    fontSize:      "1rem",
+                    lineHeight:    1.9,
+                    color:         "var(--text-2)",
+                  }}
+                >
+                  <p>
+                    That environment shaped how I think about real estate and investing:
+                    not as financial abstractions, but as systems that determine what
+                    neighborhoods exist, who can afford housing, and how cities function.
+                    The numbers in a rent roll correspond to real buildings and real
+                    tenants. The yield on a development pro forma reflects real land,
+                    real labor, and real risk.
+                  </p>
+                  <p>
+                    At Yale, I study Economics and Chemistry — a combination that mirrors
+                    my approach to problems. I build financial models the way scientists
+                    run experiments: with clear hypotheses, explicit assumptions,
+                    structured tests, and conclusions you can defend. I&rsquo;m drawn to
+                    complexity that can be mapped, measured, and improved.
+                  </p>
+                  <p>
+                    Real estate pulls me in because it sits at the intersection of
+                    valuation, leverage, operations, and human behavior. Investing demands
+                    disciplined thinking under uncertainty — you cannot be vague when
+                    capital is at stake. Legal advocacy taught me something different:
+                    that systems determine outcomes, and that technical knowledge deployed
+                    for people — not just transactions — is the highest-leverage use of
+                    analytical skill.
+                  </p>
+                  <p>
+                    My edge is integration. I can read a rent roll, underwrite a
+                    development site, draft a client advocacy letter, and build an
+                    Excel dashboard — because I&rsquo;ve had to do all of these things
+                    for real stakeholders, under real constraints.
                   </p>
                 </div>
               </div>
 
-              {/* Stats row */}
-              <div className="grid grid-cols-2 gap-3 w-full max-w-xs">
+              {/* Quick facts — spans 2 cols */}
+              <div className="lg:col-span-2 flex flex-col gap-4 reveal">
                 {[
-                  { v: "3.93", l: "Yale GPA" },
-                  { v: "#1", l: "Valedictorian" },
-                  { v: "4.00", l: "TCC GPA" },
-                  { v: "$20K", l: "Milton Fisher" },
-                ].map((s) => (
+                  {
+                    label: "Yale University",
+                    detail: "BA Economics, BS Chemistry · GPA 3.93",
+                    note: "Expected May 2029",
+                    accent: "gold",
+                  },
+                  {
+                    label: "Tacoma Community College",
+                    detail: "Associates of Arts — Biology · GPA 4.00",
+                    note: "Dean's List 2023–2025",
+                    accent: "teal",
+                  },
+                  {
+                    label: "Curtis Senior High School",
+                    detail: "Valedictorian — Ranked 1 of 460",
+                    note: "GPA 4.00",
+                    accent: "sand",
+                  },
+                ].map((e) => (
                   <div
-                    key={s.l}
-                    className="glass-card rounded-xl p-3 text-center wave-hover"
+                    key={e.label}
+                    className="glass rounded-xl shimmer lift"
+                    style={{
+                      padding:   "18px 20px",
+                      borderLeft: `2px solid ${
+                        e.accent === "gold"
+                          ? "rgba(200,169,106,0.6)"
+                          : e.accent === "teal"
+                          ? "rgba(31,166,166,0.5)"
+                          : "rgba(216,199,163,0.4)"
+                      }`,
+                    }}
                   >
-                    <div
-                      className="text-2xl font-black"
-                      style={{ color: "#c9a84c" }}
-                    >
-                      {s.v}
-                    </div>
-                    <div className="text-xs mt-0.5" style={{ color: "rgba(203,213,225,0.7)" }}>
-                      {s.l}
-                    </div>
+                    <p style={{ fontWeight: 600, color: "var(--text-1)", marginBottom: "4px", fontSize: "0.9rem" }}>
+                      {e.label}
+                    </p>
+                    <p style={{ fontSize: "0.8rem", color: "var(--text-2)", marginBottom: "4px" }}>
+                      {e.detail}
+                    </p>
+                    <p style={{ fontSize: "0.72rem", color: "var(--text-3)" }}>{e.note}</p>
                   </div>
                 ))}
+
+                <div
+                  className="glass rounded-xl"
+                  style={{ padding: "18px 20px" }}
+                >
+                  <p
+                    style={{
+                      fontSize:      "0.68rem",
+                      fontWeight:    700,
+                      letterSpacing: "0.15em",
+                      textTransform: "uppercase",
+                      color:         "var(--text-3)",
+                      marginBottom:  "12px",
+                    }}
+                  >
+                    Activities at Yale
+                  </p>
+                  {[
+                    "UP Fund Investing & Consulting",
+                    "Spkyman Foreign Policy Fellow",
+                    "Yale Assoc. for Small Claims",
+                    "Yale Real Estate Club",
+                    "Horological Society of New York",
+                  ].map((a) => (
+                    <p
+                      key={a}
+                      style={{
+                        fontSize:    "0.78rem",
+                        color:       "var(--text-2)",
+                        padding:     "5px 0",
+                        borderBottom: "1px solid rgba(255,255,255,0.04)",
+                      }}
+                    >
+                      {a}
+                    </p>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
-
-          {/* Scroll indicator */}
-          <div
-            className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-float"
-            style={{ color: "rgba(144,224,239,0.5)" }}
-          >
-            <span className="text-xs tracking-widest uppercase">Scroll</span>
-            <div
-              className="w-px h-10 rounded-full"
-              style={{ background: "linear-gradient(180deg, rgba(144,224,239,0.5), transparent)" }}
-            />
-          </div>
         </section>
 
-        {/* ══════════════════════════════
-            EDUCATION
-        ══════════════════════════════ */}
-        <section id="education" className="relative py-32">
-          <div
-            className="absolute right-4 top-8 opacity-50 hidden lg:block animate-float"
-            style={{ width: "180px", animationDelay: "0.5s" }}
-          >
-            <IslandEducation />
-          </div>
-
-          <div className="max-w-4xl mx-auto px-6 reveal">
-            <SectionTitle>Education</SectionTitle>
-
-            <div className="flex flex-col gap-5">
-              {[
-                {
-                  school: "Yale University",
-                  loc: "New Haven, CT",
-                  degree: "BA Economics, BS Chemistry",
-                  gpa: "3.93 / 4.00",
-                  date: "Expected May 2029",
-                  badges: ["UP Fund Investing", "Spkyman Foreign Policy Fellow", "Yale Small Claims", "Yale Real Estate Club"],
-                  highlight: true,
-                },
-                {
-                  school: "Tacoma Community College",
-                  loc: "Tacoma, WA",
-                  degree: "Associates of Arts — Biology",
-                  gpa: "4.00 / 4.00",
-                  date: "May 2025",
-                  badges: ["Dean's List 2023–25", "Student Senator", "Founder, Weightlifting Club"],
-                  highlight: false,
-                },
-                {
-                  school: "Curtis Senior High School",
-                  loc: "University Place, WA",
-                  degree: "Valedictorian — Ranked 1 of 460",
-                  gpa: "4.00 / 4.00",
-                  date: "May 2025",
-                  badges: [],
-                  highlight: false,
-                },
-              ].map((e) => (
-                <div
-                  key={e.school}
-                  className="glass-card rounded-2xl p-6 wave-hover"
-                  style={
-                    e.highlight
-                      ? { borderColor: "rgba(201,168,76,0.35)" }
-                      : {}
-                  }
+        {/* ══════════════════════════════════════════
+            SELECTED WORK
+        ══════════════════════════════════════════ */}
+        <section id="work" style={{ paddingTop: "96px", paddingBottom: "96px" }}>
+          <div className="max-w-6xl mx-auto px-6">
+            <div className="reveal">
+              <SectionLabel>Selected Work</SectionLabel>
+              <div style={{ maxWidth: "560px", marginBottom: "3rem" }}>
+                <h2
+                  className="serif"
+                  style={{ fontSize: "clamp(1.6rem, 2.8vw, 2.2rem)", fontWeight: 500, color: "var(--text-1)", marginBottom: "0.75rem" }}
                 >
-                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-3">
+                  Proof of work across real estate, finance, advocacy, and systems.
+                </h2>
+                <p style={{ fontSize: "0.9rem", lineHeight: 1.75, color: "var(--text-2)" }}>
+                  Each project below was completed for real stakeholders — investment committees,
+                  clients, clubs, or community members. Nothing here is hypothetical.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-5">
+              {CASE_STUDIES.map((cs, idx) => (
+                <div
+                  key={cs.id}
+                  className="glass cs-card shimmer lift reveal"
+                  style={{ animationDelay: `${idx * 0.08}s` }}
+                >
+                  {/* Header */}
+                  <div
+                    className="flex items-start justify-between gap-3 mb-4"
+                    style={{ flexWrap: "wrap" }}
+                  >
                     <div>
                       <h3
-                        className="text-lg font-bold"
-                        style={{ color: e.highlight ? "#c9a84c" : "#f1f5f9" }}
+                        className="serif"
+                        style={{
+                          fontSize:     "1.15rem",
+                          fontWeight:   600,
+                          color:        "var(--text-1)",
+                          lineHeight:   1.3,
+                          whiteSpace:   "pre-line",
+                          marginBottom: "6px",
+                        }}
                       >
-                        {e.school}
+                        {cs.title}
                       </h3>
-                      <p className="text-sm" style={{ color: "#90e0ef" }}>
-                        {e.loc}
-                      </p>
+                      <span className="badge">{cs.type}</span>
                     </div>
-                    <span className="text-xs whitespace-nowrap mt-1" style={{ color: "rgba(203,213,225,0.5)" }}>
-                      {e.date}
+                    <span
+                      className={cs.status === "Confidential" ? "badge-dim badge" : "badge-gold badge"}
+                    >
+                      {cs.status}
                     </span>
                   </div>
-                  <p className="text-sm mb-3" style={{ color: "rgba(203,213,225,0.8)" }}>
-                    {e.degree} —{" "}
-                    <span className="font-semibold" style={{ color: "#e2e8f0" }}>
-                      GPA {e.gpa}
+
+                  {/* Problem */}
+                  <p
+                    style={{
+                      fontSize:     "0.83rem",
+                      lineHeight:   1.75,
+                      color:        "var(--text-2)",
+                      marginBottom: "16px",
+                      paddingBottom: "16px",
+                      borderBottom: "1px solid rgba(255,255,255,0.05)",
+                    }}
+                  >
+                    <span style={{ color: "var(--text-3)", fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", display: "block", marginBottom: "4px" }}>
+                      Problem
                     </span>
+                    {cs.problem}
                   </p>
-                  {e.badges.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {e.badges.map((b) => (
-                        <Badge key={b}>{b}</Badge>
+
+                  {/* Outputs */}
+                  <ul style={{ marginBottom: "16px", display: "flex", flexDirection: "column", gap: "6px" }}>
+                    {cs.outputs.map((o) => (
+                      <Bullet key={o}>{o}</Bullet>
+                    ))}
+                  </ul>
+
+                  {/* Metrics */}
+                  {cs.metrics && (
+                    <div
+                      className="grid grid-cols-4 gap-2 rounded-lg"
+                      style={{
+                        background: "rgba(11,30,51,0.5)",
+                        padding:    "12px",
+                        marginBottom: "16px",
+                      }}
+                    >
+                      {cs.metrics.map((m) => (
+                        <div key={m.l} style={{ textAlign: "center" }}>
+                          <div className="metric-value" style={{ fontSize: "1rem" }}>
+                            {m.v}
+                          </div>
+                          <div className="metric-label" style={{ fontSize: "0.55rem" }}>
+                            {m.l}
+                          </div>
+                        </div>
                       ))}
                     </div>
                   )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
 
-        {/* ══════════════════════════════
-            WORK EXPERIENCE
-        ══════════════════════════════ */}
-        <section id="experience" className="relative py-32">
-          <div
-            className="absolute left-4 top-12 opacity-45 hidden lg:block animate-float"
-            style={{ width: "200px", animationDelay: "2s" }}
-          >
-            <IslandExperience />
-          </div>
-
-          <div className="max-w-4xl mx-auto px-6 reveal">
-            <SectionTitle>Work Experience</SectionTitle>
-
-            <div className="flex flex-col gap-5">
-              <div className="glass-card rounded-2xl p-6 wave-hover" style={{ borderColor: "rgba(201,168,76,0.3)" }}>
-                <div className="flex flex-col sm:flex-row sm:justify-between gap-1 mb-1">
-                  <h3 className="text-lg font-bold" style={{ color: "#c9a84c" }}>
-                    Nordic Partners Investments
-                  </h3>
-                  <span className="text-xs" style={{ color: "rgba(203,213,225,0.5)" }}>
-                    May – July 2026
-                  </span>
-                </div>
-                <p className="text-sm font-medium mb-1" style={{ color: "#90e0ef" }}>
-                  Incoming Syndication Asset Management Intern · Seattle, WA
-                </p>
-                <ul className="mt-3 space-y-2">
-                  <Bullet>Underwrote value-add multifamily acquisitions, modeling debt structures, DSCR, exit cap scenarios, and GP fee structures on deals up to $20M.</Bullet>
-                  <Bullet>Ran acquisition pricing scenarios and rent comp analyses across the Seattle submarket, validating ROI assumptions against light-renovation value-add theses.</Bullet>
-                  <Bullet>Built an AI-enabled tool that parses property financials, generates 30/60/90-day action plans, and stores data for performance visualization.</Bullet>
-                </ul>
-              </div>
-
-              <div className="glass-card rounded-2xl p-6 wave-hover">
-                <div className="flex flex-col sm:flex-row sm:justify-between gap-1 mb-1">
-                  <h3 className="text-lg font-bold" style={{ color: "#f1f5f9" }}>
-                    P. Fluorescence Genome Research
-                  </h3>
-                  <span className="text-xs" style={{ color: "rgba(203,213,225,0.5)" }}>
-                    Jan – May 2025
-                  </span>
-                </div>
-                <p className="text-sm font-medium mb-1" style={{ color: "#90e0ef" }}>
-                  Research Assistant · Tacoma, WA
-                </p>
-                <ul className="mt-3 space-y-2">
-                  <Bullet>Leveraged CRISPR to investigate P. Fluorescence, identifying DNA sequences that suppress a wheat-killing fungus.</Bullet>
-                  <Bullet>Identified genes increasing production of the DAPG suppressant, contributing to crop protection research.</Bullet>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ══════════════════════════════
-            LEADERSHIP
-        ══════════════════════════════ */}
-        <section id="leadership" className="relative py-32">
-          <div
-            className="absolute right-6 top-16 opacity-45 hidden lg:block animate-float"
-            style={{ width: "180px", animationDelay: "1.5s" }}
-          >
-            <IslandLeadership />
-          </div>
-
-          <div className="max-w-5xl mx-auto px-6 reveal">
-            <SectionTitle>Leadership &amp; Community</SectionTitle>
-
-            <div className="grid md:grid-cols-2 gap-5">
-              {[
-                {
-                  org: "Urban Philanthropic Fund",
-                  role: "Analyst",
-                  loc: "New Haven, CT",
-                  dates: "Sept 2025 – Present",
-                  bullets: [
-                    "Conducted valuations of UnitedHealth Group (UNH) to support investment decisions.",
-                    "Built DCF and Comparable Analysis models to assess market opportunities.",
-                    "Redistributed returns as grants to the New Haven community.",
-                  ],
-                },
-                {
-                  org: "Urban Philanthropic Consulting",
-                  role: "Head of Consulting",
-                  loc: "New Haven, CT",
-                  dates: "Sept 2025 – Present",
-                  bullets: [
-                    "Led creation of a financial model projecting future cash flow for decision-making.",
-                    "Identified 20% revenue growth opportunities through marketing & cost optimization.",
-                    "Presented to business executives; appointed to follow through in FY 2026.",
-                  ],
-                },
-                {
-                  org: "Yale Small Claims Assistance",
-                  role: "Treasurer",
-                  loc: "New Haven, CT",
-                  dates: "Dec 2025 – Present",
-                  bullets: [
-                    "Aided CT residents with claims assistance, reducing legal information asymmetry.",
-                    "Mastered Connecticut small claims law and procedures.",
-                  ],
-                },
-                {
-                  org: "Math Masters",
-                  role: "Founder & President",
-                  loc: "University Place, WA",
-                  dates: "Aug 2023 – 2025",
-                  bullets: [
-                    "Founded a gamified algebra course and led a 12-person team.",
-                    "Engaged 500+ students across 4 high schools and 1 community college.",
-                    "Awarded $20,000 Milton Fisher Scholarship for Innovation.",
-                  ],
-                },
-              ].map((item) => (
-                <div key={item.org} className="glass-card rounded-2xl p-5 wave-hover flex flex-col">
-                  <div className="flex items-start justify-between gap-2 mb-1">
-                    <h3 className="font-bold text-base" style={{ color: "#f1f5f9" }}>
-                      {item.org}
-                    </h3>
-                    <span className="text-xs flex-shrink-0" style={{ color: "rgba(203,213,225,0.45)" }}>
-                      {item.dates}
-                    </span>
-                  </div>
-                  <p className="text-sm mb-3" style={{ color: "#90e0ef" }}>
-                    {item.role} · {item.loc}
-                  </p>
-                  <ul className="space-y-1.5 flex-1">
-                    {item.bullets.map((b) => (
-                      <Bullet key={b}>{b}</Bullet>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ══════════════════════════════
-            SKILLS
-        ══════════════════════════════ */}
-        <section id="skills" className="relative py-32">
-          <div className="max-w-4xl mx-auto px-6 reveal">
-            <SectionTitle>Skills &amp; Interests</SectionTitle>
-
-            <div className="grid md:grid-cols-2 gap-8">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: "rgba(144,224,239,0.6)" }}>
-                  Core Skills
-                </p>
-                <div className="flex flex-wrap gap-2.5">
-                  {[
-                    "Advanced Excel",
-                    "Financial Modeling",
-                    "DCF Analysis",
-                    "Comparable Analysis",
-                    "Data Analysis",
-                    "Risk Assessment",
-                    "Financial Reporting",
-                    "Client Relationship Management",
-                    "Market Research",
-                    "CRISPR / Genomics",
-                    "AI Tool Development",
-                    "Real Estate Underwriting",
-                  ].map((s) => (
-                    <span
-                      key={s}
-                      className="px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 cursor-default"
-                      style={{
-                        background: "rgba(13,27,42,0.8)",
-                        border: "1px solid rgba(144,224,239,0.18)",
-                        color: "#cbd5e1",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.borderColor = "rgba(201,168,76,0.5)";
-                        e.currentTarget.style.color = "#c9a84c";
-                        e.currentTarget.style.background = "rgba(201,168,76,0.08)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.borderColor = "rgba(144,224,239,0.18)";
-                        e.currentTarget.style.color = "#cbd5e1";
-                        e.currentTarget.style.background = "rgba(13,27,42,0.8)";
-                      }}
-                    >
-                      {s}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: "rgba(144,224,239,0.6)" }}>
-                  Societies &amp; Memberships
-                </p>
-                <div className="flex flex-col gap-3">
-                  {[
-                    { name: "The Horological Society of New York", icon: "⌚" },
-                    { name: "UP Fund Investing and Consulting", icon: "📈" },
-                    { name: "Yale Real Estate Club", icon: "🏛" },
-                    { name: "Spkyman Foreign Policy Fellowship", icon: "🌐" },
-                  ].map((s) => (
-                    <div
-                      key={s.name}
-                      className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200"
-                      style={{
-                        background: "rgba(13,27,42,0.6)",
-                        border: "1px solid rgba(144,224,239,0.15)",
-                      }}
-                    >
-                      <span className="text-lg">{s.icon}</span>
-                      <span className="text-sm" style={{ color: "#cbd5e1" }}>
-                        {s.name}
+                  {/* Skills */}
+                  <div className="flex flex-wrap gap-1.5">
+                    {cs.skills.map((s) => (
+                      <span className="skill-tag" key={s} style={{ fontSize: "0.7rem", padding: "3px 8px" }}>
+                        {s}
                       </span>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* ══════════════════════════════
-            CONTACT
-        ══════════════════════════════ */}
-        <section id="contact" className="relative py-32 pb-48">
-          <div
-            className="absolute left-1/2 -translate-x-1/2 bottom-12 opacity-50 hidden lg:block animate-float"
-            style={{ width: "200px", animationDelay: "0.8s" }}
-          >
-            <IslandContact />
-          </div>
+        {/* ══════════════════════════════════════════
+            REAL ESTATE
+        ══════════════════════════════════════════ */}
+        <section id="realestate" style={{ paddingTop: "96px", paddingBottom: "96px" }}>
+          <div className="max-w-6xl mx-auto px-6">
+            <div className="reveal">
+              <SectionLabel>Real Estate</SectionLabel>
+            </div>
 
-          <div className="max-w-2xl mx-auto px-6 reveal">
-            <SectionTitle>Contact</SectionTitle>
-
-            <div className="glass-card rounded-3xl p-8 text-center mb-8">
-              <h2
-                className="text-3xl font-bold mb-3"
-                style={{ color: "#f1f5f9" }}
-              >
-                Let&rsquo;s Connect
-              </h2>
-              <p className="mb-8" style={{ color: "rgba(203,213,225,0.7)" }}>
-                Open to investment opportunities, research collaborations, and
-                interesting conversations.
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <a
-                  href="mailto:B.nguyen@yale.edu"
-                  className="btn-ocean flex items-center justify-center gap-2"
+            <div className="grid lg:grid-cols-2 gap-16 items-start">
+              <div className="reveal">
+                <h2
+                  className="serif"
+                  style={{ fontSize: "clamp(1.8rem, 3vw, 2.6rem)", fontWeight: 500, color: "var(--text-1)", lineHeight: 1.25, marginBottom: "1.5rem" }}
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                  Send Email
-                </a>
-                <a
-                  href="https://www.linkedin.com/in/brandon-nguyen-246tr"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 px-6 py-3 rounded-full text-sm font-semibold"
+                  Real estate is where{" "}
+                  <em style={{ color: "var(--gold)", fontStyle: "italic" }}>valuation</em>,{" "}
+                  <em style={{ color: "var(--teal)", fontStyle: "italic" }}>leverage</em>, and{" "}
+                  <em style={{ color: "var(--sand)", fontStyle: "italic" }}>operations</em>{" "}
+                  converge.
+                </h2>
+                <div style={{ display: "flex", flexDirection: "column", gap: "1rem", fontSize: "0.95rem", lineHeight: 1.85, color: "var(--text-2)" }}>
+                  <p>
+                    I came to real estate through numbers first — rent rolls, cap
+                    rates, DSCR models, expense ratios — and quickly realized the
+                    technical work only makes sense when you understand the asset.
+                    A 50% expense ratio isn&rsquo;t just a ratio. It means operating
+                    costs are eating into potential NOI, which compresses returns,
+                    which changes the deal thesis.
+                  </p>
+                  <p>
+                    My experience at Nordic Partners and through my own analysis
+                    covers the full acquisition and asset management cycle:
+                    underwriting deals, modeling debt structures, running rent comps,
+                    benchmarking operating performance, identifying leakage, and
+                    building dashboards that translate raw property data into
+                    actionable decisions.
+                  </p>
+                  <p>
+                    Real estate also connects to public interest. Every acquisition
+                    analysis I run involves real buildings and real tenants. Zoning
+                    codes, housing supply, and asset ownership patterns shape
+                    communities. That intersection is where I want to build expertise.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-4 reveal">
+                <h3
                   style={{
-                    border: "1px solid rgba(144,224,239,0.3)",
-                    color: "#90e0ef",
-                    background: "rgba(0,180,216,0.06)",
+                    fontSize:      "0.68rem",
+                    fontWeight:    700,
+                    letterSpacing: "0.2em",
+                    textTransform: "uppercase",
+                    color:         "var(--text-3)",
+                    marginBottom:  "4px",
                   }}
                 >
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
-                  </svg>
-                  LinkedIn
-                </a>
+                  Core RE Capabilities
+                </h3>
+                {[
+                  {
+                    cap: "Acquisition Underwriting",
+                    desc: "Debt structuring, DSCR, exit cap scenarios, GP fee structures, pricing on deals up to $20M.",
+                  },
+                  {
+                    cap: "Asset Management & Operations",
+                    desc: "KPI dashboards, GL reconciliation, expense ratio bridges, RUBs leakage analysis, implementation tracking.",
+                  },
+                  {
+                    cap: "Development Analysis",
+                    desc: "Site analysis, zoning review, unit mix optimization, pro formas, yield on cost, development spread.",
+                  },
+                  {
+                    cap: "Market Research",
+                    desc: "Rent comps, submarket analysis, comparable transactions, light-renovation value-add benchmarking.",
+                  },
+                ].map((c) => (
+                  <div
+                    key={c.cap}
+                    className="glass rounded-xl lift"
+                    style={{ padding: "16px 20px", borderLeft: "2px solid rgba(200,169,106,0.4)" }}
+                  >
+                    <p style={{ fontWeight: 600, fontSize: "0.88rem", color: "var(--text-1)", marginBottom: "4px" }}>
+                      {c.cap}
+                    </p>
+                    <p style={{ fontSize: "0.78rem", color: "var(--text-2)", lineHeight: 1.6 }}>
+                      {c.desc}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ══════════════════════════════════════════
+            INVESTING
+        ══════════════════════════════════════════ */}
+        <section id="investing" style={{ paddingTop: "96px", paddingBottom: "96px" }}>
+          <div className="max-w-6xl mx-auto px-6">
+            <div className="reveal">
+              <SectionLabel>Investing</SectionLabel>
+            </div>
+
+            <div className="grid lg:grid-cols-2 gap-16 items-start">
+              <div className="reveal">
+                <h2
+                  className="serif"
+                  style={{ fontSize: "clamp(1.8rem, 3vw, 2.6rem)", fontWeight: 500, color: "var(--text-1)", lineHeight: 1.25, marginBottom: "1.5rem" }}
+                >
+                  Investing rewards clarity.{" "}
+                  <em style={{ color: "var(--teal)", fontStyle: "italic" }}>
+                    Vague thinking gets priced out.
+                  </em>
+                </h2>
+                <div style={{ display: "flex", flexDirection: "column", gap: "1rem", fontSize: "0.95rem", lineHeight: 1.85, color: "var(--text-2)" }}>
+                  <p>
+                    At the Urban Philanthropic Fund, I approach public equity
+                    research the same way I approach real estate underwriting:
+                    understand the business model, map the revenue drivers, identify
+                    where the market is mispricing something, and build a defensible
+                    thesis around catalysts and risks.
+                  </p>
+                  <p>
+                    My WESCO analysis is a working example. WESCO distributes
+                    electrical equipment and supply chain solutions across three
+                    segments. The market was pricing the stock at a discount to
+                    peers — but the Ascent acquisition, combined with AI infrastructure
+                    buildout, electrification tailwinds, and margin recovery, pointed
+                    toward significant upside. The thesis required understanding
+                    industry structure, not just reading the income statement.
+                  </p>
+                  <p>
+                    I&rsquo;m interested in companies where operational improvements,
+                    market structure dynamics, and capital allocation create mispriced
+                    opportunities — particularly in industrials, real estate, and
+                    infrastructure-adjacent sectors.
+                  </p>
+                </div>
+              </div>
+
+              {/* WESCO card */}
+              <div className="reveal">
+                <div
+                  className="glass glass-gold rounded-2xl shimmer"
+                  style={{ padding: "28px" }}
+                >
+                  <div className="flex items-start justify-between gap-3 mb-4">
+                    <div>
+                      <p style={{ fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--text-3)", marginBottom: "6px" }}>
+                        Flagship Pitch
+                      </p>
+                      <h3 className="serif" style={{ fontSize: "1.3rem", fontWeight: 600, color: "var(--text-1)" }}>
+                        WESCO International
+                      </h3>
+                      <p style={{ fontSize: "0.8rem", color: "var(--text-2)" }}>WCC · Electrical Distribution & Supply Chain</p>
+                    </div>
+                    <div
+                      className="rounded-lg"
+                      style={{
+                        padding:    "6px 14px",
+                        background: "rgba(31,166,166,0.15)",
+                        border:     "1px solid rgba(31,166,166,0.4)",
+                        color:      "var(--teal)",
+                        fontWeight: 700,
+                        fontSize:   "0.85rem",
+                        flexShrink: 0,
+                      }}
+                    >
+                      BUY
+                    </div>
+                  </div>
+
+                  <div
+                    style={{
+                      display:      "flex",
+                      flexDirection: "column",
+                      gap:          "8px",
+                      marginBottom: "20px",
+                    }}
+                  >
+                    {[
+                      { label: "Core Thesis",   val: "AI/data center buildout + electrification + infrastructure spending" },
+                      { label: "Key Catalyst",  val: "Ascent acquisition creating operational leverage and margin recovery" },
+                      { label: "Valuation",     val: "P/E discount to industrial distribution peers — mispricing opportunity" },
+                      { label: "Primary Risk",  val: "Tariff exposure, debt levels, and cybersecurity vulnerability" },
+                    ].map((r) => (
+                      <div
+                        key={r.label}
+                        style={{
+                          display:       "flex",
+                          gap:           "12px",
+                          padding:       "10px 0",
+                          borderBottom:  "1px solid rgba(255,255,255,0.05)",
+                          alignItems:    "flex-start",
+                        }}
+                      >
+                        <span style={{ fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--text-3)", flexShrink: 0, minWidth: "80px", paddingTop: "2px" }}>
+                          {r.label}
+                        </span>
+                        <span style={{ fontSize: "0.82rem", color: "var(--text-2)", lineHeight: 1.6 }}>
+                          {r.val}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex flex-wrap gap-1.5">
+                    {["Electrical Distribution","3 Revenue Segments","Comparable Analysis","DCF","Catalyst Framework","$22B Market"].map((t) => (
+                      <span className="skill-tag" key={t} style={{ fontSize: "0.7rem", padding: "3px 8px" }}>{t}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ══════════════════════════════════════════
+            PUBLIC SERVICE
+        ══════════════════════════════════════════ */}
+        <section id="service" style={{ paddingTop: "96px", paddingBottom: "96px" }}>
+          <div className="max-w-6xl mx-auto px-6">
+            <div className="reveal">
+              <SectionLabel>Public Service</SectionLabel>
+            </div>
+
+            <div className="grid lg:grid-cols-2 gap-16 items-start">
+              <div className="reveal">
+                <h2
+                  className="serif"
+                  style={{ fontSize: "clamp(1.8rem, 3vw, 2.4rem)", fontWeight: 500, color: "var(--text-1)", lineHeight: 1.25, marginBottom: "1.5rem" }}
+                >
+                  Real estate is not only an asset class.{" "}
+                  <em style={{ color: "var(--teal)", fontStyle: "italic" }}>
+                    It&rsquo;s housing, neighborhoods, and people&rsquo;s lives.
+                  </em>
+                </h2>
+                <div style={{ display: "flex", flexDirection: "column", gap: "1rem", fontSize: "0.95rem", lineHeight: 1.85, color: "var(--text-2)" }}>
+                  <p>
+                    My legal and public service work started with a simple
+                    observation: complex systems disadvantage people who don&rsquo;t
+                    have access to technical knowledge. Shelter access rules, small
+                    claims procedures, public benefits eligibility — these systems
+                    have real stakes and are not well-explained to the people most
+                    affected by them.
+                  </p>
+                  <p>
+                    At Legal Aid Society, I worked directly with homeless clients
+                    navigating NYC&rsquo;s shelter system. At Yale&rsquo;s Small Claims
+                    Assistance program, I help Connecticut residents understand
+                    court procedures that legal professionals take for granted.
+                    At Urban Philanthropic Fund, investment returns are redistributed
+                    as grants to New Haven — a direct loop between financial
+                    performance and community benefit.
+                  </p>
+                  <p>
+                    These experiences shaped how I think about real estate development
+                    and investment. Buildings create neighborhoods. Neighborhoods
+                    determine access to schools, employment, and stability. The
+                    financial analysis is inseparable from those outcomes.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-4 reveal">
+                {[
+                  {
+                    org:     "Legal Aid Society — Homeless Rights Project",
+                    role:    "Legal Advocacy Intern",
+                    impact:  "Supported 5+ clients through housing navigation, advocacy letters, and case documentation across NYC shelter and housing systems.",
+                    accent:  "#1FA6A6",
+                  },
+                  {
+                    org:     "Yale Student Association for Small Claims Assistance",
+                    role:    "Treasurer",
+                    impact:  "Aids CT residents navigating small claims court — reducing information asymmetry for unrepresented litigants.",
+                    accent:  "#C8A96A",
+                  },
+                  {
+                    org:     "Urban Philanthropic Fund",
+                    role:    "Analyst",
+                    impact:  "Investment returns redistributed as community grants to New Haven — aligning financial performance with public benefit.",
+                    accent:  "#1FA6A6",
+                  },
+                  {
+                    org:     "Urban Philanthropic Consulting",
+                    role:    "Head of Consulting",
+                    impact:  "Delivered the New Haven Annex Club strategy — a community institution strengthened through revenue analysis and 2026 implementation plan.",
+                    accent:  "#C8A96A",
+                  },
+                ].map((s) => (
+                  <div
+                    key={s.org}
+                    className="glass rounded-xl lift"
+                    style={{ padding: "18px 20px", borderLeft: `2px solid ${s.accent}60` }}
+                  >
+                    <p style={{ fontWeight: 600, fontSize: "0.88rem", color: "var(--text-1)", marginBottom: "2px" }}>
+                      {s.org}
+                    </p>
+                    <p style={{ fontSize: "0.72rem", color: s.accent, fontWeight: 600, marginBottom: "8px" }}>
+                      {s.role}
+                    </p>
+                    <p style={{ fontSize: "0.8rem", lineHeight: 1.65, color: "var(--text-2)" }}>
+                      {s.impact}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ══════════════════════════════════════════
+            EXPERIENCE
+        ══════════════════════════════════════════ */}
+        <section id="leadership" style={{ paddingTop: "96px", paddingBottom: "96px" }}>
+          <div className="max-w-4xl mx-auto px-6">
+            <div className="reveal">
+              <SectionLabel>Experience &amp; Leadership</SectionLabel>
+            </div>
+
+            <div style={{ position: "relative", paddingLeft: "28px" }}>
+              <div className="timeline-line" />
+              {EXPERIENCE.map((e, i) => (
+                <div
+                  key={e.org}
+                  className="reveal"
+                  style={{ position: "relative", marginBottom: i < EXPERIENCE.length - 1 ? "40px" : 0 }}
+                >
+                  <div className="timeline-dot" />
+                  <div className="glass cs-card shimmer lift" style={{ borderLeft: "none" }}>
+                    <div
+                      className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1 mb-3"
+                    >
+                      <div>
+                        <h3 style={{ fontWeight: 700, fontSize: "1rem", color: "var(--text-1)", marginBottom: "2px" }}>
+                          {e.org}
+                        </h3>
+                        <p style={{ fontSize: "0.82rem", color: "var(--teal)", fontWeight: 600 }}>
+                          {e.role}
+                        </p>
+                        <p style={{ fontSize: "0.75rem", color: "var(--text-3)" }}>{e.loc}</p>
+                      </div>
+                      <span
+                        className="badge-dim badge flex-shrink-0 mt-1"
+                        style={{ alignSelf: "flex-start" }}
+                      >
+                        {e.date}
+                      </span>
+                    </div>
+                    <ul style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                      {e.bullets.map((b) => (
+                        <Bullet key={b}>{b}</Bullet>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ══════════════════════════════════════════
+            SKILLS
+        ══════════════════════════════════════════ */}
+        <section id="skills" style={{ paddingTop: "96px", paddingBottom: "96px" }}>
+          <div className="max-w-6xl mx-auto px-6">
+            <div className="reveal">
+              <SectionLabel>Skills</SectionLabel>
+            </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {SKILL_CATEGORIES.map((cat, i) => (
+                <div
+                  key={cat.title}
+                  className="glass rounded-xl reveal lift"
+                  style={{ padding: "22px", animationDelay: `${i * 0.06}s` }}
+                >
+                  <p
+                    style={{
+                      fontSize:      "0.66rem",
+                      fontWeight:    700,
+                      letterSpacing: "0.18em",
+                      textTransform: "uppercase",
+                      color:         "var(--gold)",
+                      marginBottom:  "14px",
+                    }}
+                  >
+                    {cat.title}
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {cat.skills.map((s) => (
+                      <span className="skill-tag" key={s}>{s}</span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Interests row */}
+            <div
+              className="reveal mt-6 glass rounded-xl"
+              style={{ padding: "20px 24px" }}
+            >
+              <p
+                style={{
+                  fontSize:      "0.66rem",
+                  fontWeight:    700,
+                  letterSpacing: "0.18em",
+                  textTransform: "uppercase",
+                  color:         "var(--text-3)",
+                  marginBottom:  "12px",
+                }}
+              >
+                Outside the Work
+              </p>
+              <div className="flex flex-wrap gap-3">
+                {[
+                  { icon: "⌚", t: "Horology" },
+                  { icon: "🏗", t: "Real Estate" },
+                  { icon: "📈", t: "Markets" },
+                  { icon: "⚙️", t: "Systems & Mechanics" },
+                  { icon: "🏋", t: "Fitness" },
+                  { icon: "⛵", t: "Boating" },
+                  { icon: "⛳", t: "Golf" },
+                  { icon: "🔧", t: "Building Things" },
+                ].map((it) => (
+                  <span
+                    key={it.t}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
+                    style={{
+                      background: "rgba(255,255,255,0.04)",
+                      border:     "1px solid rgba(255,255,255,0.07)",
+                      fontSize:   "0.8rem",
+                      color:      "var(--text-2)",
+                    }}
+                  >
+                    {it.icon} {it.t}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ══════════════════════════════════════════
+            CONTACT
+        ══════════════════════════════════════════ */}
+        <section id="contact" style={{ paddingTop: "96px", paddingBottom: "120px" }}>
+          <div className="max-w-3xl mx-auto px-6 text-center reveal">
+            <div style={{ marginBottom: "1rem" }}>
+              <div
+                style={{
+                  display:       "inline-flex",
+                  alignItems:    "center",
+                  gap:           "12px",
+                  marginBottom:  "1.5rem",
+                }}
+              >
+                <div style={{ width: "28px", height: "1.5px", background: "var(--gold)" }} />
+                <span style={{ fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.28em", textTransform: "uppercase", color: "var(--gold)" }}>
+                  Contact
+                </span>
+                <div style={{ width: "28px", height: "1.5px", background: "var(--gold)" }} />
               </div>
             </div>
 
-            {/* Contact info tiles */}
-            <div className="grid grid-cols-3 gap-3 text-center text-sm">
+            <h2
+              className="serif"
+              style={{
+                fontSize:     "clamp(2rem, 4vw, 3.2rem)",
+                fontWeight:   500,
+                color:        "var(--text-1)",
+                lineHeight:   1.2,
+                marginBottom: "1.25rem",
+              }}
+            >
+              Open to real estate, investing,
+              <br />
+              and meaningful conversations.
+            </h2>
+            <p
+              style={{
+                fontSize:     "1rem",
+                lineHeight:   1.8,
+                color:        "var(--text-2)",
+                maxWidth:     "480px",
+                margin:       "0 auto 2.5rem",
+              }}
+            >
+              Whether you&rsquo;re building something interesting in real estate
+              PE, running an investment fund, or working on a problem that requires
+              sharp analysis and follow-through — let&rsquo;s talk.
+            </p>
+
+            <div className="flex flex-wrap gap-4 justify-center mb-10">
+              <a href="mailto:B.nguyen@yale.edu" className="btn-primary">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                Send Email
+              </a>
+              <a
+                href="https://www.linkedin.com/in/brandon-nguyen-246tr"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-ghost"
+              >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                </svg>
+                LinkedIn
+              </a>
+            </div>
+
+            <div
+              className="glass rounded-2xl"
+              style={{ padding: "24px", display: "inline-grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1px", width: "100%", maxWidth: "480px" }}
+            >
               {[
-                { label: "Email", value: "B.nguyen@yale.edu", href: "mailto:B.nguyen@yale.edu" },
-                { label: "Phone", value: "(253) 240-5196", href: "tel:2532405196" },
-                { label: "Location", value: "Tacoma, WA", href: "#" },
+                { label: "Email",    value: "B.nguyen@yale.edu",  href: "mailto:B.nguyen@yale.edu" },
+                { label: "Phone",    value: "(253) 240-5196",     href: "tel:2532405196"           },
+                { label: "Location", value: "Tacoma, WA",         href: "#"                        },
               ].map((c) => (
                 <a
                   key={c.label}
                   href={c.href}
-                  className="glass-light rounded-xl py-3 px-2"
-                  style={{ color: "rgba(203,213,225,0.7)" }}
+                  style={{ textAlign: "center", textDecoration: "none", padding: "8px 4px" }}
                 >
-                  <div className="text-xs uppercase tracking-wider mb-1" style={{ color: "rgba(144,224,239,0.5)" }}>
+                  <div style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-3)", marginBottom: "4px" }}>
                     {c.label}
                   </div>
-                  <div className="text-xs font-medium truncate">{c.value}</div>
+                  <div style={{ fontSize: "0.75rem", color: "var(--text-2)" }}>{c.value}</div>
                 </a>
               ))}
             </div>
@@ -1229,16 +1413,19 @@ export default function Home() {
 
         {/* Footer */}
         <footer
-          className="relative z-10 py-8 text-center text-xs"
           style={{
-            color: "rgba(203,213,225,0.35)",
-            borderTop: "1px solid rgba(144,224,239,0.08)",
-            background: "rgba(2,11,22,0.6)",
+            padding:      "24px",
+            textAlign:    "center",
+            fontSize:     "0.72rem",
+            color:        "var(--text-3)",
+            borderTop:    "1px solid rgba(255,255,255,0.05)",
+            background:   "rgba(3,6,16,0.4)",
           }}
         >
-          &copy; 2026 Brandon Luu Nguyen. Navigating ambition, one wave at a time.
+          &copy; 2026 Brandon Luu Nguyen &nbsp;·&nbsp; Tacoma, WA &nbsp;·&nbsp;
+          Built with precision and purpose.
         </footer>
-      </div>
+      </main>
     </div>
   );
 }
