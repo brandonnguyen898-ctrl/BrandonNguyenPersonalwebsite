@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+:root {
+  --yale-blue: #00356b;
+  --yale-blue-light: #0056a8;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
