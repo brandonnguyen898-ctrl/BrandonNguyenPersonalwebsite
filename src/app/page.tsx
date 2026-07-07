@@ -115,7 +115,7 @@ const PROJECTS = [
     title: "Seattle Student Housing AM Dashboard",
     category: "Asset Management",
     status: "Confidential",
-    file: "/projects/seattle-housing-dashboard.pdf",
+    file: null,
     summary: "Two co-managed Seattle multifamily properties lacked unified dashboards to track operating KPIs and identify performance leakage.",
     bullets: [
       "Built KPI bridges from current to signed-lease to stabilized 95% occupancy for 111 combined units",
@@ -191,7 +191,7 @@ const PROJECTS = [
     title: "Legal Aid Society — Homeless Rights Project",
     category: "Legal Advocacy",
     status: "Public",
-    file: "/projects/legal-aid.pdf",
+    file: null,
     summary: "Worked directly with homeless clients in NYC navigating shelter access, housing eligibility, and public benefits systems.",
     bullets: [
       "Supported 5+ clients through housing navigation and case documentation",
@@ -819,6 +819,7 @@ export default function Home() {
                   >
                     {p.status}
                   </span>
+                  {p.file && (
                   <a
                     href={p.file}
                     download
@@ -844,6 +845,7 @@ export default function Home() {
                     </svg>
                     PDF
                   </a>
+                  )}
                 </div>
               </div>
 
