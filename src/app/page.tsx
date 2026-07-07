@@ -506,6 +506,16 @@ export default function Home() {
 
                 <div className="flex flex-wrap gap-3">
                   <a href="#work" className="btn-primary">View Work</a>
+                  <a
+                    href="/resume.pdf"
+                    download="Brandon_Nguyen_Resume.pdf"
+                    className="btn-ghost"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                    </svg>
+                    Resume
+                  </a>
                   <a href="#contact" className="btn-ghost">Contact Me</a>
                   <a
                     href="https://www.linkedin.com/in/brandon-nguyen-246tr"
@@ -1379,6 +1389,16 @@ export default function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
                 Send Email
+              </a>
+              <a
+                href="/resume.pdf"
+                download="Brandon_Nguyen_Resume.pdf"
+                className="btn-primary"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                </svg>
+                Download Resume
               </a>
               <a
                 href="https://www.linkedin.com/in/brandon-nguyen-246tr"
