@@ -14,52 +14,113 @@ const DEPTH_MARKS = Array.from({ length: 18 }, (_, i) => ({
   o: ((i * 13) % 4) / 10 + 0.03,
 }));
 
-// Hero boat — larger, side-profile cinematic silhouette
+// Hero boat — cinematic side-profile speedboat, bow facing left
 function HeroBoat() {
   return (
-    <svg viewBox="0 0 240 72" fill="none" style={{ width: "100%", height: "100%" }}>
+    <svg viewBox="0 0 420 180" fill="none" style={{ width: "100%", height: "100%" }}>
+      {/* V-shaped wake spread behind stern (right side) */}
+      <path d="M385,95 L420,60 L420,130 Z" fill="rgba(180,220,255,0.05)" />
+
+      {/* Wake dashed lines trailing to the right */}
+      <path d="M383,84 C395,80 408,78 420,76"
+        stroke="rgba(180,220,255,0.35)" strokeWidth="1.4" strokeDasharray="9 5" fill="none" strokeLinecap="round" />
+      <path d="M383,106 C395,110 408,112 420,114"
+        stroke="rgba(180,220,255,0.25)" strokeWidth="1.1" strokeDasharray="7 6" fill="none" strokeLinecap="round" />
+      <path d="M385,95 C400,95 412,95.5 420,95"
+        stroke="rgba(255,255,255,0.14)" strokeWidth="0.8" strokeDasharray="5 8" fill="none" strokeLinecap="round" />
+      <path d="M380,89 C395,87 410,86 420,85"
+        stroke="rgba(180,220,255,0.15)" strokeWidth="0.7" strokeDasharray="4 7" fill="none" strokeLinecap="round" />
+
+      {/* Bow wave / foam on the left */}
+      <ellipse cx="32" cy="102" rx="20" ry="9" fill="rgba(200,230,255,0.14)" />
+      <path d="M28,96 C22,100 20,106 26,110"
+        stroke="rgba(200,230,255,0.4)" strokeWidth="1.2" fill="none" strokeLinecap="round" />
+
       {/* Water reflection */}
-      <ellipse cx="120" cy="64" rx="100" ry="6" fill="rgba(196,164,96,0.04)" />
-      {/* Hull shadow */}
-      <ellipse cx="120" cy="58" rx="96" ry="10" fill="rgba(0,0,0,0.5)" />
-      {/* Main hull */}
+      <ellipse cx="210" cy="120" rx="170" ry="7" fill="rgba(196,164,96,0.035)" />
+
+      {/* Main hull outer — pointed bow left, transom stern right */}
       <path
-        d="M8,36 C18,18 50,8 120,6 C190,8 222,18 234,36 C222,54 190,64 120,64 C50,64 18,54 8,36 Z"
-        fill="#0D1318"
-        stroke="rgba(255,255,255,0.08)"
+        d="M28,88
+           C36,97 52,108 72,112
+           L340,116
+           L378,110
+           L380,60
+           C365,54 345,50 318,48
+           C290,46 268,50 248,56
+           C210,64 160,74 110,82
+           C82,86 56,88 28,88 Z"
+        fill="#0C1E30"
+        stroke="rgba(255,255,255,0.12)"
         strokeWidth="0.8"
       />
-      {/* Deck */}
+
+      {/* Deck surface — slightly lighter, shows elevated angle */}
       <path
-        d="M20,36 C32,22 60,14 120,12 C180,14 208,22 220,36 C208,50 180,58 120,58 C60,58 32,50 20,36 Z"
-        fill="#131B26"
+        d="M56,86
+           C80,80 130,72 168,66
+           C205,60 238,54 260,51
+           C282,49 302,49 320,50
+           L360,52 L370,56
+           L370,62
+           C355,60 338,59 318,59
+           C295,60 260,66 225,72
+           C188,78 148,84 106,88
+           C88,90 70,90 56,88 Z"
+        fill="#131E2C"
       />
-      {/* Gold stripe — waterline */}
+
+      {/* Gold waterline stripe along hull side */}
       <path
-        d="M20,33 C32,20 60,13 120,11 C180,13 208,20 220,33"
-        stroke="rgba(196,164,96,0.45)"
-        strokeWidth="0.8"
+        d="M50,106 C90,110 160,113 250,115 L340,115 L375,110"
+        stroke="rgba(196,164,96,0.78)"
+        strokeWidth="1.8"
         fill="none"
       />
-      <path
-        d="M20,39 C32,52 60,59 120,61 C180,59 208,52 220,39"
-        stroke="rgba(196,164,96,0.45)"
-        strokeWidth="0.8"
+
+      {/* Raised cockpit — middle-left area with gold-trimmed windshield */}
+      <path d="M185,65 L205,48 L310,48 L328,58 L325,76 L190,76 Z"
+        fill="#0A1520"
+        stroke="rgba(255,255,255,0.1)"
+        strokeWidth="0.6"
+      />
+
+      {/* Windshield — angled front glass */}
+      <path d="M185,65 L205,48 L245,48 L248,65 Z"
+        fill="rgba(94,150,200,0.22)"
+        stroke="rgba(94,150,200,0.38)"
+        strokeWidth="0.5"
+      />
+
+      {/* Gold windshield trim */}
+      <path d="M185,65 L205,48 L245,48"
+        stroke="rgba(196,164,96,0.58)"
+        strokeWidth="0.9"
         fill="none"
       />
-      {/* Superstructure / cabin block */}
-      <rect x="88" y="16" width="60" height="28" rx="3" fill="#0A111A" stroke="rgba(255,255,255,0.07)" strokeWidth="0.5" />
-      {/* Windshield */}
-      <path d="M92,20 L142,20 L146,28 L88,28 Z" fill="rgba(94,122,150,0.15)" />
-      {/* Nav light — bow */}
-      <circle cx="10" cy="36" r="3" fill="rgba(196,164,96,0.35)" />
-      <circle cx="10" cy="36" r="1.5" fill="rgba(196,164,96,0.7)" />
-      {/* Stern engine block */}
-      <rect x="228" y="29" width="10" height="14" rx="2" fill="#0A111A" stroke="rgba(255,255,255,0.06)" strokeWidth="0.4" />
-      {/* Wake lines */}
-      <path d="M234,31 C244,30 256,31 268,30" stroke="rgba(255,255,255,0.14)" strokeWidth="1" strokeDasharray="5 4" fill="none" />
-      <path d="M234,41 C244,42 256,41 268,42" stroke="rgba(255,255,255,0.09)" strokeWidth="0.7" strokeDasharray="4 5" fill="none" />
-      <path d="M234,36 C248,36 260,36.5 272,36" stroke="rgba(255,255,255,0.06)" strokeWidth="0.5" strokeDasharray="3 6" fill="none" />
+
+      {/* Chrome / white bow accent */}
+      <path d="M28,88 C42,76 68,66 95,62"
+        stroke="rgba(220,232,245,0.5)"
+        strokeWidth="1.8"
+        fill="none"
+        strokeLinecap="round"
+      />
+
+      {/* Engine block at stern (right) */}
+      <rect x="372" y="62" width="14" height="46" rx="2.5"
+        fill="#070D18"
+        stroke="rgba(255,255,255,0.1)"
+        strokeWidth="0.6"
+      />
+      <line x1="374" y1="71" x2="384" y2="71" stroke="rgba(255,255,255,0.14)" strokeWidth="0.7" />
+      <line x1="374" y1="79" x2="384" y2="79" stroke="rgba(255,255,255,0.14)" strokeWidth="0.7" />
+      <line x1="374" y1="87" x2="384" y2="87" stroke="rgba(255,255,255,0.14)" strokeWidth="0.7" />
+      <line x1="374" y1="95" x2="384" y2="95" stroke="rgba(255,255,255,0.14)" strokeWidth="0.7" />
+
+      {/* Bow nav light */}
+      <circle cx="30" cy="88" r="7" fill="rgba(196,164,96,0.2)" />
+      <circle cx="30" cy="88" r="3.5" fill="rgba(196,164,96,0.82)" />
     </svg>
   );
 }
@@ -112,113 +173,133 @@ function IslandSilhouette({ type }: { type: "city" | "grid" | "beacon" }) {
 const PROJECTS = [
   {
     id: "dashboard",
-    title: "Seattle Student Housing AM Dashboard",
-    category: "Asset Management",
+    title: "Seattle Student Housing Asset Management Dashboard",
+    category: "Asset Management · Operations",
     status: "Confidential",
     file: null,
-    summary: "Two co-managed Seattle multifamily properties lacked unified dashboards to track operating KPIs and identify performance leakage.",
+    summary: "Two co-managed student housing properties in Seattle needed a clearer way to track performance, identify issues, and make operating decisions.",
     bullets: [
-      "Built KPI bridges from current to signed-lease to stabilized 95% occupancy for 111 combined units",
-      "Identified $20.6K in annual RUBs utility leakage through GL reconciliation and billing analysis",
-      "Delivered 30/60/90-day implementation tracker across 8 operational categories",
+      "Built KPI bridges from current occupancy to signed-lease and stabilized occupancy",
+      "Reviewed GL data, billing practices, and operating expenses",
+      "Identified $20.6K in annual RUBs utility leakage",
+      "Created a 30/60/90-day implementation tracker across eight operating categories",
     ],
     metrics: [
-      { v: "111",   l: "Units"          },
-      { v: "~49%",  l: "Exp. Ratio"     },
-      { v: "$20.6K",l: "RUBs Leakage"  },
+      { v: "111",    l: "Units"         },
+      { v: "$20.6K", l: "RUBs Leakage" },
+      { v: "8",      l: "Focus Areas"  },
     ],
-    tags: ["Asset Management","NOI Analysis","Excel","RUBs","Expense Benchmarking"],
+    tags: ["Asset Management","Dashboard Design","Excel Modeling","RUBs","Expense Benchmarking"],
   },
   {
     id: "munson",
     title: "110 Munson St. — New Haven Development Pitch",
-    category: "Development Underwriting",
+    category: "Development Analysis · Investment Memo",
     status: "Public",
     file: "/projects/110-munson-st.pdf",
-    summary: "2.04-acre RH-2 infill site in New Haven, CT priced at $2M. Evaluated mixed-use development feasibility and produced a full investment memo.",
+    summary: "Evaluated a 2.04-acre infill development site in New Haven and built a full investment memo around zoning, unit mix, rents, costs, and exit assumptions.",
     bullets: [
-      "Analyzed zoning by right and designed 185-unit mixed-use program (studios, 1BR, 2BR + 15% NNN commercial)",
-      "Pro forma reached 7.52% yield on cost with 2.02% development spread over 5.50% exit cap",
-      "Modeled ~$18.8M projected sale profit after stabilization",
+      "Analyzed zoning and development feasibility",
+      "Designed a 185-unit mixed-use program",
+      "Built a pro forma with yield-on-cost and exit valuation analysis",
+      "Modeled projected sale profit after stabilization",
     ],
     metrics: [
-      { v: "7.52%",  l: "YOC"           },
+      { v: "7.52%",  l: "Yield on Cost" },
+      { v: "185",    l: "Proposed Units" },
       { v: "$18.8M", l: "Proj. Profit"  },
-      { v: "185",    l: "Units"         },
     ],
-    tags: ["Development Underwriting","Zoning Analysis","Pro Forma","Yield on Cost","Rent Comps"],
+    tags: ["Zoning Analysis","Development Underwriting","Pro Forma","Yield on Cost","Rent Comps"],
   },
   {
     id: "wesco",
     title: "WESCO International — Public Equity Thesis",
-    category: "Equity Research",
+    category: "Public Equity Research",
     status: "Public",
     file: "/projects/wesco-thesis.pdf",
-    summary: "WESCO (WCC) traded at a discount to industrial distribution peers. Evaluated thesis against three structural tailwinds and the Ascent acquisition.",
+    summary: "Researched WESCO International, an electrical distribution company exposed to data center growth, electrification, infrastructure spending, and grid modernization.",
     bullets: [
-      "Issued BUY — thesis anchored to AI/data center buildout, electrification, and infrastructure spending",
-      "Segmentation analysis across EES, Communications & Security, and Utility & Broadband",
-      "P/E discount to peers identified as mispricing driven by Ascent integration overhang",
+      "Built a thesis around segment-level growth drivers",
+      "Compared valuation against industrial distribution peers",
+      "Evaluated the Ascent acquisition, margin recovery, tariffs, debt, and cybersecurity risk",
+      "Presented a BUY recommendation",
     ],
     metrics: [
-      { v: "BUY",  l: "Rating"         },
-      { v: "3",    l: "Segments"       },
-      { v: "P/E↓", l: "vs. Peers"     },
+      { v: "BUY",  l: "Rating"    },
+      { v: "3",    l: "Segments"  },
+      { v: "P/E↓", l: "vs. Peers" },
     ],
-    tags: ["Equity Research","DCF","Comparable Analysis","Catalyst Framework","Industry Structure"],
+    tags: ["DCF","Comparable Company Analysis","Catalyst Framework","Risk Framework","Industry Structure"],
   },
   {
     id: "annex",
     title: "New Haven Annex Club — Revenue Strategy",
-    category: "Consulting",
+    category: "Consulting · Nonprofit Strategy",
     status: "Public",
     file: "/projects/annex-club-strategy.pdf",
-    summary: "Club over-reliant on rental revenue (~65% of total), with stagnating membership and rising costs. Engagement produced a restructuring roadmap.",
+    summary: "Worked with the New Haven Annex Club on membership, revenue, and operating strategy as the organization faced rising costs and reliance on rental income.",
     bullets: [
-      "Diagnosed rental revenue concentration and proposed diversification to 30–50% membership-driven mix",
-      "Recommended agent network expansion, digital launch, community programming, and guest-pass program",
-      "2026 implementation roadmap approved by club executives",
+      "Analyzed revenue concentration and cost structure",
+      "Recommended membership, programming, and marketing changes",
+      "Built a 2026 implementation roadmap",
+      "Presented recommendations to club leadership",
     ],
     metrics: [
-      { v: "~65%",   l: "Rental Dep."  },
-      { v: "+20%",   l: "Rev. Target"  },
-      { v: "FY2026", l: "Roadmap"      },
+      { v: "+20%",   l: "Rev. Target" },
+      { v: "FY2026", l: "Roadmap"     },
+      { v: "4",      l: "Focus Areas" },
     ],
-    tags: ["Consulting","Revenue Analysis","Marketing Strategy","Nonprofit","Implementation"],
+    tags: ["Revenue Analysis","Membership Strategy","Implementation Planning","Nonprofit","Consulting"],
   },
   {
     id: "legal",
     title: "Legal Aid Society — Homeless Rights Project",
-    category: "Legal Advocacy",
+    category: "Legal Advocacy · Housing Access",
     status: "Public",
     file: null,
-    summary: "Worked directly with homeless clients in NYC navigating shelter access, housing eligibility, and public benefits systems.",
+    summary: "Worked with homeless clients in New York City navigating shelter access, housing eligibility, public benefits, and documentation barriers.",
     bullets: [
-      "Supported 5+ clients through housing navigation and case documentation",
-      "Researched NYC shelter policy, housing eligibility, and public benefits law",
-      "Drafted advocacy letters to housing providers, shelters, and city agencies",
+      "Supported clients through housing navigation and case documentation",
+      "Researched shelter access, housing eligibility, and public benefits rules",
+      "Drafted advocacy letters to providers, shelters, and city agencies",
     ],
     metrics: null,
-    tags: ["Legal Advocacy","Housing Navigation","Case Documentation","Policy Research"],
+    tags: ["Client Advocacy","Legal Research","Housing Navigation","Case Documentation"],
   },
   {
     id: "math",
-    title: "Math Masters — Founder",
-    category: "EdTech / Social Impact",
+    title: "Math Masters",
+    category: "Founder · Education Technology",
     status: "Public",
     file: "/projects/math-masters.pdf",
-    summary: "Founded a gamified Algebra I platform in Pierce County to improve engagement and outcomes for high school students.",
+    summary: "Founded a gamified Algebra I program in Pierce County to make math practice more engaging and accessible for students.",
     bullets: [
-      "Built curriculum, recruited 12-person team, scaled to 500+ students across 5 schools",
-      "Networked programming into 4 high schools and 1 community college",
-      "Awarded $20,000 Milton Fisher Scholarship for Innovation",
+      "Built the curriculum and learning structure",
+      "Recruited and led a 12-person team",
+      "Expanded programming to five schools and reached 500+ students",
+      "Awarded the $20,000 Milton Fisher Scholarship for Innovation",
     ],
     metrics: [
-      { v: "500+", l: "Students"       },
-      { v: "$20K", l: "Milton Fisher"  },
-      { v: "5",    l: "Schools"        },
+      { v: "500+", l: "Students"      },
+      { v: "$20K", l: "Scholarship"   },
+      { v: "5",    l: "Schools"       },
     ],
-    tags: ["Founder","Curriculum Design","Team Leadership","Outreach","EdTech"],
+    tags: ["Founder","Curriculum Design","Team Leadership","Community Outreach","EdTech"],
+  },
+  {
+    id: "fluorescens",
+    title: "P. fluorescens Genome Research",
+    category: "Research Assistant · Biology",
+    status: "Public",
+    file: null,
+    summary: "Worked on research involving Pseudomonas fluorescens and its ability to suppress a wheat-killing fungal pathogen.",
+    bullets: [
+      "Used CRISPR-based research techniques",
+      "Studied gene sequences related to antifungal compound production",
+      "Contributed technical documentation for ongoing lab research",
+    ],
+    metrics: null,
+    tags: ["Genomics","CRISPR Research","Scientific Writing","Biological Systems"],
   },
 ];
 
@@ -228,32 +309,36 @@ const EXPERIENCE = [
     org:    "Nordic Partners Investments",
     role:   "Syndication Asset Management Intern",
     loc:    "Seattle, WA",
-    date:   "May – July 2026",
+    date:   "May 2026 – July 2026",
     bullets: [
-      "Underwrote value-add multifamily acquisitions — debt structuring, DSCR, exit cap scenarios, GP fee structures on deals up to $20M.",
-      "Built an AI-enabled tool parsing property financials into 30/60/90-day action plans and performance dashboards.",
-      "Developed Seattle Student Housing AM Dashboard for two co-managed properties, identifying $20.6K in annual RUBs leakage.",
+      "Underwrote value-add multifamily acquisitions, including debt structure, DSCR, exit cap, and return scenarios.",
+      "Built tools for organizing property financials, action plans, and performance reporting.",
+      "Developed an asset management dashboard for two Seattle student housing properties.",
+      "Identified $20.6K in annual RUBs utility leakage through billing and GL analysis.",
     ],
   },
   {
     org:    "Urban Philanthropic Fund",
     role:   "Analyst",
     loc:    "New Haven, CT",
-    date:   "Sept 2025 – Present",
+    date:   "September 2025 – Present",
     bullets: [
-      "Equity valuations including UNH — DCF and comparable analysis models for the investment committee.",
-      "Researched public company fundamentals and sector dynamics across the portfolio.",
-      "Returns redistributed as grants to New Haven — financial performance tied to community benefit.",
+      "Research public companies and prepare investment materials for committee review.",
+      "Build DCF and comparable company analysis models.",
+      "Study company fundamentals, industry structure, and portfolio positioning.",
+      "Contribute to a student-run fund whose returns support New Haven grants.",
     ],
   },
   {
     org:    "Urban Philanthropic Consulting",
     role:   "Head of Consulting",
     loc:    "New Haven, CT",
-    date:   "Sept 2025 – Present",
+    date:   "September 2025 – Present",
     bullets: [
-      "Led New Haven Annex Club engagement: revenue analysis, cost benchmarking, marketing strategy, and FY2026 roadmap presentation.",
-      "Financial model identified 20% revenue growth opportunity through membership and programming diversification.",
+      "Led the New Haven Annex Club consulting engagement.",
+      "Built financial analysis around revenue mix, costs, membership, and programming.",
+      "Presented a 2026 implementation roadmap to club leadership.",
+      "Identified a potential 20% revenue growth opportunity.",
     ],
   },
   {
@@ -262,38 +347,43 @@ const EXPERIENCE = [
     loc:    "New York, NY",
     date:   "2025 – 2026",
     bullets: [
-      "Supported 5+ clients through housing navigation, advocacy letters, and case documentation in NYC's shelter system.",
-      "Researched shelter access law, housing eligibility, and public benefits policy alongside supervising attorneys.",
+      "Supported homeless clients navigating New York City's shelter and housing systems.",
+      "Researched shelter access law, housing eligibility, and public benefits policy.",
+      "Drafted advocacy letters and organized case documentation.",
     ],
   },
   {
     org:    "Yale Small Claims Assistance",
     role:   "Treasurer",
     loc:    "New Haven, CT",
-    date:   "Dec 2025 – Present",
+    date:   "December 2025 – Present",
     bullets: [
-      "Aid Connecticut residents navigating small claims court — reducing information asymmetry for unrepresented litigants.",
-      "Manage organizational finances and coordinate member resources for client intake.",
+      "Help Connecticut residents understand small claims court procedures.",
+      "Manage organizational finances and member resources.",
+      "Support client intake and procedural research.",
     ],
   },
   {
     org:    "Math Masters",
     role:   "Founder & President",
     loc:    "University Place, WA",
-    date:   "Aug 2023 – 2025",
+    date:   "August 2023 – 2025",
     bullets: [
-      "Founded gamified Algebra I platform — 12-person team, 500+ students, 5 schools across Pierce County.",
-      "Awarded $20,000 Milton Fisher Scholarship for Innovation.",
+      "Founded a gamified Algebra I learning platform.",
+      "Built a 12-person team and reached 500+ students across Pierce County.",
+      "Expanded programming to four high schools and one community college.",
+      "Received the $20,000 Milton Fisher Scholarship for Innovation.",
     ],
   },
   {
-    org:    "P. Fluorescens Genome Research",
+    org:    "P. fluorescens Genome Research",
     role:   "Research Assistant",
     loc:    "Tacoma, WA",
-    date:   "Jan – May 2025",
+    date:   "January 2025 – May 2025",
     bullets: [
-      "CRISPR-based investigation of Pseudomonas fluorescens — identified DNA sequences suppressing a wheat fungal pathogen.",
-      "Gene-level analysis targeting DAPG suppressant production for biological crop protection.",
+      "Conducted CRISPR-based research on Pseudomonas fluorescens.",
+      "Studied DNA sequences linked to suppression of a wheat fungal pathogen.",
+      "Produced technical documentation for ongoing lab research.",
     ],
   },
 ];
@@ -302,23 +392,23 @@ const EXPERIENCE = [
 const SKILLS = [
   {
     title: "Finance",
-    items: ["Financial Modeling","DCF Analysis","Comparable Analysis","Public Equity Research","DSCR Modeling","GP Fee Structures","Cap Rate Analysis","Valuation","Risk Assessment"],
+    items: ["Financial Modeling","DCF Analysis","Comparable Company Analysis","Public Equity Research","Valuation","Risk Assessment","Debt Modeling","Investment Writing"],
   },
   {
     title: "Real Estate",
-    items: ["Multifamily Underwriting","Value-Add Strategy","Asset Management","Development Pro Formas","Zoning Analysis","Unit Mix Optimization","RUBs Analysis","Expense Benchmarking","Rent Comps","Stabilization Modeling"],
+    items: ["Multifamily Underwriting","Development Analysis","Rent Comps","Expense Benchmarking","Asset Management","RUBs Analysis","NOI Analysis","Cap Rate Analysis","DSCR Modeling"],
   },
   {
     title: "Technical",
-    items: ["Advanced Excel","Dashboard Design","KPI Tracking","GL Reconciliation","Data Analysis","AI-Enabled Tooling","Financial Reporting","Process Documentation"],
+    items: ["Advanced Excel","Dashboard Design","Data Analysis","KPI Tracking","GL Reconciliation","Financial Reporting","AI-Enabled Tooling","Process Documentation"],
   },
   {
-    title: "Legal & Advocacy",
-    items: ["Housing Navigation","Advocacy Writing","Case Documentation","Small Claims Law","Public Benefits Research","Legal Research"],
+    title: "Legal & Public Service",
+    items: ["Housing Navigation","Advocacy Writing","Case Documentation","Small Claims Procedure","Public Benefits Research","Legal Research","Client Intake"],
   },
   {
-    title: "Consulting & Strategy",
-    items: ["Revenue Analysis","Cost Benchmarking","Market Research","Implementation Planning","Marketing Strategy","Executive Presentations"],
+    title: "Consulting & Leadership",
+    items: ["Revenue Analysis","Cost Benchmarking","Market Research","Implementation Planning","Executive Presentations","Team Leadership","Curriculum Design","Community Outreach"],
   },
 ];
 
@@ -372,7 +462,7 @@ export default function Home() {
           style={{
             position: "absolute",
             inset:    0,
-            background: "radial-gradient(ellipse 120% 60% at 50% 80%, #0A1624 0%, #060810 50%, var(--bg) 100%)",
+            background: "radial-gradient(ellipse 140% 70% at 50% 95%, #0A2845 0%, #061825 50%, #040C18 100%)",
           }}
         />
 
@@ -382,8 +472,8 @@ export default function Home() {
             position:   "absolute",
             inset:      0,
             backgroundImage: `
-              linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px)
+              linear-gradient(rgba(94,150,200,0.025) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(94,150,200,0.025) 1px, transparent 1px)
             `,
             backgroundSize: "80px 80px",
             animation: "fadeDepth 12s ease-in-out infinite",
@@ -401,11 +491,23 @@ export default function Home() {
               width:        `${d.s}px`,
               height:       `${d.s}px`,
               borderRadius: "50%",
-              background:   "rgba(255,255,255,1)",
-              opacity:      d.o,
+              background:   "rgba(140,200,255,1)",
+              opacity:      d.o * 0.75,
             }}
           />
         ))}
+
+        {/* Water surface shimmer lines */}
+        <div style={{ position: "absolute", inset: 0, pointerEvents: "none", overflow: "hidden" }}>
+          <svg style={{ position: "absolute", bottom: 0, left: 0, width: "200%", height: "50%", animation: "navWaterScroll 20s linear infinite", opacity: 0.4 }} viewBox="0 0 2000 400" preserveAspectRatio="none">
+            {[60,100,140,180,220,260,300,340].map((y,i) => (
+              <path key={i}
+                d={`M0,${y} Q250,${y-4} 500,${y} Q750,${y+4} 1000,${y} Q1250,${y-4} 1500,${y} Q1750,${y+4} 2000,${y}`}
+                stroke={`rgba(60,120,200,${0.04+i*0.008})`} strokeWidth="0.8" fill="none"
+              />
+            ))}
+          </svg>
+        </div>
 
         {/* Island silhouettes */}
         <div
@@ -522,7 +624,7 @@ export default function Home() {
                 lineHeight:   1.6,
               }}
             >
-              Yale student focused on real estate, investing, and operating systems.
+              I&apos;m a Yale student interested in investing, public service, research, and building tools that make complicated work easier to understand.
             </p>
             <p
               style={{
@@ -533,8 +635,7 @@ export default function Home() {
                 maxWidth:     "480px",
               }}
             >
-              I underwrite multifamily acquisitions, build asset management tools,
-              research public equities, and work on housing access.
+              My work has included financial modeling, public equity research, legal advocacy, nonprofit consulting, education technology, and science research.
             </p>
 
             {/* Meta chips */}
@@ -643,7 +744,7 @@ export default function Home() {
             {/* Education cards */}
             {[
               { school: "Yale University",           detail: "BA Economics, BS Chemistry", sub: "GPA 3.93 · Expected May 2029",    accent: true  },
-              { school: "Tacoma Community College",  detail: "Associates of Arts — Biology",sub: "GPA 4.00 · Dean's List 2023–25", accent: false },
+              { school: "Tacoma Community College",  detail: "Associate of Arts — Biology",  sub: "GPA 4.00 · Dean's List 2023–2025", accent: false },
               { school: "Curtis Senior High School", detail: "Valedictorian, ranked 1/460", sub: "GPA 4.00",                       accent: false },
             ].map((e) => (
               <div
@@ -676,24 +777,24 @@ export default function Home() {
                 letterSpacing: "-0.01em",
               }}
             >
-              I grew up in Tacoma, Washington — a port city where capital and real estate shape neighborhoods.
+              I grew up in Tacoma, Washington, and came to Yale after starting at Tacoma Community College.
             </h2>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "1rem", color: "var(--text-2)", lineHeight: 1.8 }}>
               <p>
-                That background shaped how I think about deals: not as abstractions, but as buildings,
-                tenants, land, and the systems that connect them. A rent roll is a management report.
-                A cap rate reflects real risk and real operating assumptions.
+                I&apos;m interested in the kinds of problems that require both careful analysis and practical
+                follow-through: evaluating an investment, helping someone navigate a legal system,
+                building a dashboard, or turning an idea into something people can actually use.
               </p>
               <p>
-                At Yale I study Economics and Chemistry — a pairing that reflects how I approach analysis.
-                I build financial models the way researchers run experiments: with explicit assumptions,
-                structured tests, and conclusions I can defend under scrutiny.
+                At Yale, I study Economics and Chemistry. I like the mix because it keeps me close to both
+                markets and research. Economics pushes me to think about incentives, institutions, and
+                decision-making. Chemistry trains me to be precise, test assumptions, and respect evidence.
               </p>
               <p>
-                My work spans acquisition underwriting, asset management dashboards, public equity research,
-                and legal advocacy for housing access. The common thread is structured analysis applied
-                to real stakeholder problems.
+                Most of my work falls into a few areas: investing, real estate analysis, public service,
+                education, and technical projects. I&apos;m drawn to work where the stakes are real and the
+                output has to be useful — not just interesting on paper.
               </p>
             </div>
 
@@ -741,20 +842,8 @@ export default function Home() {
       <section id="work" style={{ padding: "96px 40px", maxWidth: "1200px", margin: "0 auto" }}>
         <div className="reveal">
           <div className="label"><span>Selected Work</span></div>
-          <h2
-            style={{
-              fontFamily:   "var(--font-serif)",
-              fontSize:     "clamp(1.5rem, 2.2vw, 2rem)",
-              fontWeight:   400,
-              color:        "var(--text-1)",
-              marginBottom: "0.75rem",
-              maxWidth:     "520px",
-            }}
-          >
-            Projects completed for real stakeholders.
-          </h2>
-          <p style={{ fontSize: "0.85rem", color: "var(--text-2)", marginBottom: "3rem", maxWidth: "440px" }}>
-            Investment committees, club executives, legal clients, and communities.
+          <p style={{ fontSize: "0.85rem", color: "var(--text-2)", marginBottom: "3rem", maxWidth: "480px" }}>
+            A mix of finance, consulting, advocacy, education, and research projects.
           </p>
         </div>
 
@@ -943,61 +1032,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══ REAL ESTATE ════════════════════════════════════════════ */}
-      <section id="realestate" style={{ padding: "96px 40px", maxWidth: "1200px", margin: "0 auto" }}>
-        <div className="reveal">
-          <div className="label"><span>Real Estate</span></div>
-        </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "64px", alignItems: "start" }}>
-          <div className="reveal">
-            <h2 style={{ fontFamily: "var(--font-serif)", fontSize: "clamp(1.5rem, 2.2vw, 2.2rem)", fontWeight: 400, color: "var(--text-1)", lineHeight: 1.2, marginBottom: "1.5rem" }}>
-              Acquisitions, asset management, and development analysis.
-            </h2>
-            <div style={{ color: "var(--text-2)", lineHeight: 1.8, display: "flex", flexDirection: "column", gap: "0.9rem" }}>
-              <p>
-                My work at Nordic Partners covered the full acquisition and asset management cycle:
-                underwriting value-add multifamily deals, modeling debt structures and DSCR,
-                benchmarking operating performance, and building dashboards that translate property data
-                into actionable decisions.
-              </p>
-              <p>
-                The 110 Munson St. development analysis added site-level work — zoning, unit mix
-                optimization, pro formas, yield on cost, and development spread.
-              </p>
-              <p>
-                Real estate also connects directly to housing access and community outcomes.
-                That dimension matters to how I evaluate deals.
-              </p>
-            </div>
-          </div>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: "2px" }} className="reveal">
-            {[
-              { cap: "Acquisition Underwriting",      detail: "Debt structuring, DSCR, exit cap scenarios, GP fee structures, pricing up to $20M."              },
-              { cap: "Asset Management",              detail: "KPI dashboards, GL reconciliation, expense ratio bridges, implementation tracking."                },
-              { cap: "RUBs & Expense Analysis",       detail: "Utility leakage identification, expense benchmarking, GL coding reconciliation."                  },
-              { cap: "Development Pro Formas",        detail: "Site analysis, zoning review, unit mix optimization, yield on cost, development spread."          },
-              { cap: "Market & Rent Comps",           detail: "Submarket analysis, comparable transactions, light-renovation value-add benchmarking."           },
-            ].map((c, i) => (
-              <div
-                key={c.cap}
-                style={{
-                  padding:       "16px 0",
-                  borderBottom:  "1px solid var(--border)",
-                  display:       "grid",
-                  gridTemplateColumns: "180px 1fr",
-                  gap:           "20px",
-                  alignItems:    "start",
-                }}
-              >
-                <p style={{ fontSize: "0.8125rem", fontWeight: 600, color: "var(--text-1)" }}>{c.cap}</p>
-                <p style={{ fontSize: "0.8rem", color: "var(--text-2)", lineHeight: 1.65 }}>{c.detail}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ═══ INVESTING ══════════════════════════════════════════════ */}
       <section id="investing" style={{ padding: "96px 40px", maxWidth: "1200px", margin: "0 auto" }}>
         <div className="reveal">
@@ -1006,23 +1040,34 @@ export default function Home() {
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "64px", alignItems: "start" }}>
           <div className="reveal">
             <h2 style={{ fontFamily: "var(--font-serif)", fontSize: "clamp(1.5rem, 2.2vw, 2.2rem)", fontWeight: 400, color: "var(--text-1)", lineHeight: 1.2, marginBottom: "1.5rem" }}>
-              Thesis-driven public equity research.
+              I&apos;m interested in investing because it rewards clear thinking.
             </h2>
             <div style={{ color: "var(--text-2)", lineHeight: 1.8, display: "flex", flexDirection: "column", gap: "0.9rem" }}>
               <p>
-                At Urban Philanthropic Fund, I research public equities using the same analytical framework
-                I apply to real estate: understand the business model, map the revenue drivers, identify
-                mispricing, and build a thesis around defensible catalysts and quantified risks.
+                A good thesis has to explain what the market is missing, why that gap exists, and what
+                could cause it to close.
               </p>
               <p>
-                WESCO International (WCC) is my flagship example — electrical distribution company
-                at the intersection of AI infrastructure buildout, electrification, and grid modernization.
-                Ascent acquisition overhang created a P/E discount to peers I viewed as temporary.
+                At Urban Philanthropic Fund, I research public companies, build valuation models, and
+                present investment ideas to the committee. My work has included DCFs, comparable company
+                analysis, segment research, industry mapping, and risk review.
               </p>
               <p>
-                I'm drawn to industrials, real estate, and infrastructure-adjacent equities where
-                operational improvement and capital allocation create mispriced situations.
+                My WESCO thesis focused on electrical distribution, data center growth, electrification,
+                infrastructure spending, and the company&apos;s Ascent acquisition. The question was simple:
+                was the discount to peers justified, or was the market over-penalizing temporary
+                integration risk?
               </p>
+            </div>
+            <div style={{ marginTop: "2rem" }}>
+              <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-3)", marginBottom: "12px" }}>
+                Areas of Interest
+              </p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "5px" }}>
+                {["Public Equities","Industrials","Infrastructure","Real Estate-Adjacent","Capital Allocation","Market Structure","Valuation"].map((t) => (
+                  <span className="tag" key={t}>{t}</span>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -1060,10 +1105,10 @@ export default function Home() {
 
               <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>
                 {[
-                  { k: "Thesis",    v: "AI/data center buildout + electrification + infrastructure spending" },
-                  { k: "Catalyst",  v: "Ascent acquisition leverage unwinding — margin recovery path" },
-                  { k: "Valuation", v: "P/E discount to industrial distribution peers — temporary overhang" },
-                  { k: "Key Risk",  v: "Tariff exposure, debt levels, cybersecurity vulnerability" },
+                  { k: "Thesis",    v: "AI/data center buildout, electrification, and infrastructure spending" },
+                  { k: "Catalyst",  v: "Ascent acquisition leverage unwinding — clear margin recovery path" },
+                  { k: "Valuation", v: "P/E discount to industrial distribution peers — temporary integration overhang" },
+                  { k: "Key Risk",  v: "Tariff exposure, debt levels, and cybersecurity vulnerability" },
                 ].map((r) => (
                   <div
                     key={r.k}
@@ -1103,38 +1148,36 @@ export default function Home() {
       <section id="service" style={{ padding: "96px 40px", maxWidth: "1200px", margin: "0 auto" }}>
         <div className="reveal">
           <div className="label"><span>Public Service</span></div>
-          <h2 style={{ fontFamily: "var(--font-serif)", fontSize: "clamp(1.5rem, 2.2vw, 2rem)", fontWeight: 400, color: "var(--text-1)", marginBottom: "0.75rem", maxWidth: "480px" }}>
-            Housing access, legal advocacy, and community investment.
-          </h2>
-          <p style={{ fontSize: "0.85rem", color: "var(--text-2)", marginBottom: "3rem", maxWidth: "440px" }}>
-            The same systems I analyze financially have direct consequences for people.
+          <p style={{ fontSize: "0.85rem", color: "var(--text-2)", marginBottom: "3rem", maxWidth: "500px" }}>
+            A lot of important systems are hard to navigate unless someone explains them clearly.
+            That is what drew me to legal advocacy, small claims assistance, and community-focused investing.
           </p>
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "1px", background: "var(--border)", border: "1px solid var(--border)", borderRadius: "6px", overflow: "hidden" }}>
           {[
             {
-              org:    "Legal Aid Society",
-              role:   "Homeless Rights Intern",
-              desc:   "Supported 5+ NYC clients through shelter navigation, advocacy correspondence, and case documentation. Researched shelter access law and public benefits eligibility.",
-              link:   "/projects/legal-aid.pdf",
+              org:    "Legal Aid Society — Homeless Rights Project",
+              role:   "Legal Advocacy Intern",
+              desc:   "Supported homeless clients in New York City with housing navigation, advocacy letters, shelter access research, and case documentation.",
+              link:   null,
             },
             {
               org:    "Yale Small Claims Assistance",
               role:   "Treasurer",
-              desc:   "Aid CT residents navigating small claims court. Mastered procedure, eligibility thresholds, and judgment enforcement to reduce information asymmetry.",
+              desc:   "Help Connecticut residents understand small claims procedure, filing rules, eligibility thresholds, and judgment enforcement.",
               link:   null,
             },
             {
               org:    "Urban Philanthropic Fund",
               role:   "Analyst",
-              desc:   "Investment returns redistributed as community grants to New Haven. Financial performance and public benefit in a direct loop.",
+              desc:   "Research investments for a fund where returns are redistributed as grants to New Haven organizations.",
               link:   null,
             },
             {
               org:    "Urban Philanthropic Consulting",
               role:   "Head of Consulting",
-              desc:   "Delivered strategy for New Haven Annex Club — revenue restructuring and 2026 implementation roadmap. Community institution strengthened through structured analysis.",
+              desc:   "Led a consulting engagement for the New Haven Annex Club, helping the organization improve revenue strategy, membership growth, and long-term planning.",
               link:   "/projects/annex-club-strategy.pdf",
             },
           ].map((s, i) => (
@@ -1279,11 +1322,10 @@ export default function Home() {
               marginBottom: "1rem",
             }}
           >
-            Open to real estate, investing,<br />and serious conversations.
+            Open to conversations about investing, public service,<br />research, and building useful things.
           </h2>
           <p style={{ fontSize: "0.9rem", color: "var(--text-2)", lineHeight: 1.75, maxWidth: "420px", marginBottom: "2.5rem" }}>
-            If you're building something in real estate PE, running a fund, or working on a problem
-            that requires sharp analysis — reach out.
+            Reach out any time.
           </p>
 
           <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", marginBottom: "3rem" }}>

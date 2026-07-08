@@ -3,15 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 
 const SECTIONS = [
-  { id: "hero",       label: "Home",          pct: 2  },
-  { id: "about",      label: "About",         pct: 13 },
-  { id: "work",       label: "Work",          pct: 24 },
-  { id: "realestate", label: "Real Estate",   pct: 35 },
-  { id: "investing",  label: "Investing",     pct: 46 },
-  { id: "service",    label: "Service",       pct: 57 },
-  { id: "leadership", label: "Experience",    pct: 68 },
-  { id: "skills",     label: "Skills",        pct: 79 },
-  { id: "contact",    label: "Contact",       pct: 91 },
+  { id: "hero",       label: "Home",           pct: 2  },
+  { id: "about",      label: "About",          pct: 15 },
+  { id: "work",       label: "Work",           pct: 28 },
+  { id: "investing",  label: "Investing",      pct: 41 },
+  { id: "service",    label: "Public Service", pct: 54 },
+  { id: "leadership", label: "Experience",     pct: 67 },
+  { id: "skills",     label: "Skills",         pct: 80 },
+  { id: "contact",    label: "Contact",        pct: 93 },
 ];
 
 // Islands placed above/below the center course line
@@ -26,23 +25,23 @@ const ISLANDS = [
 // Boat weave path: [pct*100, yOffset from centerline px]
 // Boat arcs around each island as it passes
 const WEAVE: [number, number][] = [
-  [0,    0],
-  [10,  -2],
-  [17, -10],   // arc above island @17%
-  [24,   0],
-  [28,   3],
-  [31,  10],   // arc below island @31%
-  [38,   0],
-  [44,  -3],
-  [49, -10],   // arc above island @49%
-  [56,   0],
-  [61,   3],
-  [65,  10],   // arc below island @65%
-  [72,   0],
-  [78,  -3],
-  [82, -10],   // arc above island @82%
-  [90,   0],
-  [100,  0],
+  [0,   0],
+  [10,  -1.5],
+  [17,  -7],
+  [24,  0],
+  [28,  2.5],
+  [31,  7],
+  [38,  0],
+  [44,  -2],
+  [49,  -7],
+  [56,  0],
+  [61,  2.5],
+  [65,  7],
+  [72,  0],
+  [78,  -2],
+  [82,  -7],
+  [90,  0],
+  [100, 0],
 ];
 
 function getWeaveY(pct100: number): number {
@@ -119,102 +118,100 @@ function IslandRocky() {
   );
 }
 
-// ── Detailed NavBoat ──────────────────────────────────────────────────
+// ── Side-profile NavBoat ──────────────────────────────────────────────
 
 function NavBoat({ flipped, speed }: { flipped: boolean; speed: number }) {
   const wk = Math.min(speed, 1); // 0–1 wake intensity
   return (
     <svg
-      width="64" height="22" viewBox="0 0 64 22" fill="none"
+      width="80" height="26" viewBox="0 0 80 26" fill="none"
       overflow="visible"
       style={{ display: "block", transform: flipped ? "scaleX(-1)" : "none" }}
     >
-      {/* === Wake lines (trailing from stern) === */}
+      {/* Wake lines — trail from stern (right side), scale with speed */}
       <path
-        d="M61,8.5 C68,7.6 76,8.4 86,7.5"
-        stroke={`rgba(255,255,255,${wk * 0.65})`}
-        strokeWidth="0.9" strokeDasharray="5 3" fill="none"
-        strokeLinecap="round"
+        d="M70,12 C78,11.2 90,12 104,11"
+        stroke={`rgba(180,220,255,${wk * 0.6})`}
+        strokeWidth="0.9" strokeDasharray="5 3" fill="none" strokeLinecap="round"
       />
       <path
-        d="M61,13.5 C68,14.4 76,13.6 86,14.5"
-        stroke={`rgba(255,255,255,${wk * 0.45})`}
-        strokeWidth="0.7" strokeDasharray="4 4" fill="none"
-        strokeLinecap="round"
+        d="M70,16 C78,16.8 90,16 104,16.8"
+        stroke={`rgba(180,220,255,${wk * 0.4})`}
+        strokeWidth="0.7" strokeDasharray="4 4" fill="none" strokeLinecap="round"
       />
       <path
-        d="M61,11 C70,11 80,11.5 90,11"
-        stroke={`rgba(255,255,255,${wk * 0.22})`}
-        strokeWidth="0.5" strokeDasharray="2 6" fill="none"
-        strokeLinecap="round"
-      />
-      {/* Foam at bow when moving */}
-      <ellipse
-        cx="4" cy="11" rx="3.5" ry="2"
-        fill={`rgba(255,255,255,${wk * 0.1})`}
+        d="M70,14 C83,14 96,14.5 110,14"
+        stroke={`rgba(255,255,255,${wk * 0.18})`}
+        strokeWidth="0.5" strokeDasharray="2 6" fill="none" strokeLinecap="round"
       />
 
-      {/* === Hull outer === */}
+      {/* Bow wave / foam (left) */}
+      <ellipse cx="5" cy="15.5" rx="4" ry="2" fill={`rgba(200,230,255,${wk * 0.14})`} />
+
+      {/* Hull outer — pointed bow left, transom stern right */}
       <path
-        d="M4,11 C7,5 17,2 32,2 C47,2 57,5 60,11 C57,17 47,20 32,20 C17,20 7,17 4,11 Z"
-        fill="#0D1520"
-        stroke="rgba(255,255,255,0.13)"
-        strokeWidth="0.6"
+        d="M3,13 C5,15.5 8,17.5 12,18.5 L65,19 L70,17.5 L70,9 C63,8.5 56,7.5 50,7 L36,8 C25,10 14,12 5,13 L3,13 Z"
+        fill="#0C1E30"
+        stroke="rgba(255,255,255,0.14)"
+        strokeWidth="0.5"
       />
-      {/* === Deck surface === */}
+
+      {/* Deck surface */}
       <path
-        d="M8,11 C11,6.5 19,4 32,4 C45,4 53,6.5 56,11 C53,15.5 45,18 32,18 C19,18 11,15.5 8,11 Z"
+        d="M9,13.5 C15,12 25,10.5 36,8.5 L50,7.5 C56,8 63,9 67,9.5 L67,18.5 L12,18.5 C9.5,18 7.5,16 9,13.5 Z"
         fill="#131E2C"
       />
-      {/* === Gold waterline top === */}
+
+      {/* Gold waterline stripe */}
       <path
-        d="M8,9.5 C11,5.5 19,3.5 32,3.5 C45,3.5 53,5.5 56,9.5"
-        stroke="rgba(196,164,96,0.58)" strokeWidth="0.7" fill="none"
-      />
-      {/* === Gold waterline bottom === */}
-      <path
-        d="M8,12.5 C11,16.5 19,18.5 32,18.5 C45,18.5 53,16.5 56,12.5"
-        stroke="rgba(196,164,96,0.58)" strokeWidth="0.7" fill="none"
+        d="M6,16 C10,17.2 15,18.5 22,19 L63,19 L68,17.5"
+        stroke="rgba(196,164,96,0.72)"
+        strokeWidth="0.9"
+        fill="none"
       />
 
-      {/* === Forward deck panels === */}
-      <path d="M9,10 L8,11 L9,12 L17,12.5 L17,9.5 Z" fill="rgba(255,255,255,0.03)" />
+      {/* Cockpit surround */}
+      <rect x="36" y="8" width="22" height="9.5" rx="1"
+        fill="#0A1520"
+        stroke="rgba(255,255,255,0.09)"
+        strokeWidth="0.4"
+      />
 
-      {/* === Cabin / bridge block === */}
-      <rect x="23" y="5.5" width="20" height="11" rx="1.5"
-        fill="#0A1320" stroke="rgba(255,255,255,0.1)" strokeWidth="0.5" />
-      {/* Windshield */}
-      <path d="M25,6.5 L39,6.5 L41,9 L23,9 Z"
-        fill="rgba(94,122,150,0.2)" stroke="rgba(94,122,150,0.2)" strokeWidth="0.3" />
-      {/* Cabin windows */}
-      <rect x="27" y="10" width="4" height="3" rx="0.6"
-        fill="rgba(94,122,150,0.16)" stroke="rgba(94,122,150,0.2)" strokeWidth="0.3" />
-      <rect x="33.5" y="10" width="4" height="3" rx="0.6"
-        fill="rgba(94,122,150,0.16)" stroke="rgba(94,122,150,0.2)" strokeWidth="0.3" />
+      {/* Windshield — angled front glass */}
+      <path d="M36,9 L38,7 L54,7 L56,9 Z"
+        fill="rgba(94,150,200,0.25)"
+        stroke="rgba(94,150,200,0.35)"
+        strokeWidth="0.35"
+      />
 
-      {/* === Mast === */}
-      <line x1="33" y1="5.5" x2="33" y2="2.5" stroke="rgba(255,255,255,0.22)" strokeWidth="0.5" />
-      {/* Radar arm */}
-      <line x1="33" y1="3.2" x2="35.5" y2="3.2" stroke="rgba(255,255,255,0.14)" strokeWidth="0.5" />
-      <circle cx="35.5" cy="3.2" r="0.8" fill="rgba(196,164,96,0.3)" />
+      {/* Gold windshield trim */}
+      <path d="M36,9 L38,7 L54,7 L56,9"
+        stroke="rgba(196,164,96,0.42)"
+        strokeWidth="0.4"
+        fill="none"
+      />
 
-      {/* === Bow nav light === */}
-      <circle cx="4" cy="11" r="2.2" fill="rgba(196,164,96,0.25)" />
-      <circle cx="4" cy="11" r="1.1" fill="rgba(196,164,96,0.9)" />
+      {/* Chrome / white bow accent */}
+      <path d="M3,13 C5,11.5 8,10.5 13,10"
+        stroke="rgba(220,232,245,0.4)"
+        strokeWidth="0.7"
+        fill="none"
+        strokeLinecap="round"
+      />
 
-      {/* === Stern engine block === */}
-      <rect x="58" y="7.5" width="6" height="7" rx="1.2"
-        fill="#090E16" stroke="rgba(255,255,255,0.08)" strokeWidth="0.4" />
-      {/* Engine vents */}
-      <line x1="59.5" y1="9.5" x2="62.5" y2="9.5" stroke="rgba(255,255,255,0.08)" strokeWidth="0.4" />
-      <line x1="59.5" y1="11" x2="62.5" y2="11"  stroke="rgba(255,255,255,0.08)" strokeWidth="0.4" />
-      <line x1="59.5" y1="12.5" x2="62.5" y2="12.5" stroke="rgba(255,255,255,0.08)" strokeWidth="0.4" />
+      {/* Engine block at stern */}
+      <rect x="68" y="9.5" width="6" height="8" rx="1"
+        fill="#070D18"
+        stroke="rgba(255,255,255,0.1)"
+        strokeWidth="0.4"
+      />
+      <line x1="69" y1="11.5" x2="73" y2="11.5" stroke="rgba(255,255,255,0.12)" strokeWidth="0.35" />
+      <line x1="69" y1="13"   x2="73" y2="13"   stroke="rgba(255,255,255,0.12)" strokeWidth="0.35" />
+      <line x1="69" y1="14.5" x2="73" y2="14.5" stroke="rgba(255,255,255,0.12)" strokeWidth="0.35" />
 
-      {/* === Deck cleats / detail lines === */}
-      <line x1="16" y1="8.5"  x2="22" y2="8.5"  stroke="rgba(255,255,255,0.05)" strokeWidth="0.5" />
-      <line x1="16" y1="13.5" x2="22" y2="13.5" stroke="rgba(255,255,255,0.05)" strokeWidth="0.5" />
-      <line x1="44" y1="8.5"  x2="54" y2="8.5"  stroke="rgba(255,255,255,0.05)" strokeWidth="0.5" />
-      <line x1="44" y1="13.5" x2="54" y2="13.5" stroke="rgba(255,255,255,0.05)" strokeWidth="0.5" />
+      {/* Bow nav light */}
+      <circle cx="4" cy="13" r="2.2" fill="rgba(196,164,96,0.28)" />
+      <circle cx="4" cy="13" r="1.1" fill="rgba(196,164,96,0.88)" />
     </svg>
   );
 }
@@ -255,7 +252,7 @@ function Waypoint({ active, href, label }: { active: boolean; href: string; labe
 
 interface Ripple { id: number; x: number; y: number; }
 
-const BOAT_W = 64;
+const BOAT_W = 80;
 
 export default function OceanNav() {
   const [scrollPct,  setScrollPct]  = useState(0);
@@ -328,11 +325,11 @@ export default function OceanNav() {
         position:       "fixed",
         top: 0, left: 0, right: 0,
         zIndex:         50,
-        background:     scrolled ? "rgba(4,10,20,0.97)" : "rgba(4,10,20,0.82)",
+        background:     scrolled ? "rgba(2,12,28,0.97)" : "rgba(2,16,38,0.85)",
         backdropFilter: "blur(14px)",
         WebkitBackdropFilter: "blur(14px)",
         borderBottom:   scrolled
-          ? "1px solid rgba(94,122,150,0.2)"
+          ? "1px solid rgba(94,122,150,0.22)"
           : "1px solid rgba(94,122,150,0.08)",
         transition: "background 0.35s ease, border-color 0.35s ease",
       }}
@@ -378,9 +375,9 @@ export default function OceanNav() {
             inset: 0,
             background:
               "linear-gradient(180deg," +
-              " rgba(3,12,26,0.9) 0%," +
-              " rgba(4,16,32,0.95) 40%," +
-              " rgba(3,12,26,0.9) 100%)",
+              " rgba(3,20,48,0.9) 0%," +
+              " rgba(4,22,52,0.95) 40%," +
+              " rgba(3,20,48,0.9) 100%)",
           }} />
 
           {/* Animated water shimmer — layer 1 (slow) */}
@@ -410,7 +407,7 @@ export default function OceanNav() {
                   ` Q1400,${y + 1.8} 1600,${y}` +
                   ` Q1800,${y - 1.8} 2000,${y}`
                 }
-                stroke={`rgba(94,122,150,${0.04 + (i % 2) * 0.03})`}
+                stroke={`rgba(60,120,200,${0.05 + (i % 2) * 0.04})`}
                 strokeWidth="0.6"
                 fill="none"
               />
@@ -447,7 +444,7 @@ export default function OceanNav() {
                   ` Q1500,${y + 2} 1800,${y}` +
                   ` Q1900,${y - 1} 2000,${y}`
                 }
-                stroke={`rgba(94,122,150,${0.025 + i * 0.01})`}
+                stroke={`rgba(60,120,200,${0.03 + i * 0.012})`}
                 strokeWidth="0.5"
                 fill="none"
               />
@@ -589,7 +586,7 @@ export default function OceanNav() {
       {mobileOpen && (
         <div style={{
           borderTop:  "1px solid var(--border)",
-          background: "rgba(4,10,20,0.98)",
+          background: "rgba(2,12,28,0.98)",
         }}>
           {SECTIONS.map((s) => (
             <a
