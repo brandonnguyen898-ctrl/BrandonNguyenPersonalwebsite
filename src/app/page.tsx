@@ -1,62 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import OceanNav from "@/components/OceanNav";
-
-// ── Hero ocean scene ─────────────────────────────────────────────────
-
-// Deterministic grid points for water depth variation
-const DEPTH_MARKS = Array.from({ length: 18 }, (_, i) => ({
-  x: (i * 83 + 17) % 100,
-  y: (i * 47 + 31) % 100,
-  s: ((i * 19) % 3) + 1,
-  o: ((i * 13) % 4) / 10 + 0.03,
-}));
-
-// Island silhouettes — architectural, not tropical
-function IslandSilhouette({ type }: { type: "city" | "grid" | "beacon" }) {
-  if (type === "city") return (
-    <svg viewBox="0 0 120 60" fill="none" style={{ width: "100%", height: "100%" }}>
-      <rect x="10" y="30" width="14" height="30" fill="rgba(255,255,255,0.06)" />
-      <rect x="28" y="18" width="18" height="42" fill="rgba(255,255,255,0.07)" />
-      <rect x="50" y="8"  width="22" height="52" fill="rgba(255,255,255,0.08)" />
-      <rect x="76" y="22" width="16" height="38" fill="rgba(255,255,255,0.06)" />
-      <rect x="96" y="34" width="12" height="26" fill="rgba(255,255,255,0.05)" />
-      {/* Windows */}
-      <rect x="53" y="14" width="3" height="3" fill="rgba(196,164,96,0.12)" />
-      <rect x="60" y="14" width="3" height="3" fill="rgba(196,164,96,0.08)" />
-      <rect x="53" y="22" width="3" height="3" fill="rgba(196,164,96,0.14)" />
-      <rect x="60" y="22" width="3" height="3" fill="rgba(196,164,96,0.06)" />
-      {/* Base / water line */}
-      <rect x="0" y="59" width="120" height="1" fill="rgba(255,255,255,0.04)" />
-    </svg>
-  );
-
-  if (type === "grid") return (
-    <svg viewBox="0 0 100 50" fill="none" style={{ width: "100%", height: "100%" }}>
-      {/* Abstract data/finance structure */}
-      <line x1="10" y1="40" x2="90" y2="40" stroke="rgba(255,255,255,0.06)" strokeWidth="0.5" />
-      <line x1="10" y1="25" x2="90" y2="25" stroke="rgba(255,255,255,0.04)" strokeWidth="0.5" />
-      <path d="M10,40 L22,28 L34,33 L46,18 L58,24 L70,10 L82,20 L90,14" stroke="rgba(196,164,96,0.2)" strokeWidth="0.8" fill="none" />
-      <circle cx="70" cy="10" r="2" fill="rgba(196,164,96,0.25)" />
-      {[10,22,34,46,58,70,82,90].map((x,i)=> (
-        <circle key={i} cx={x} cy={[40,28,33,18,24,10,20,14][i]} r="1.5" fill="rgba(255,255,255,0.1)" />
-      ))}
-    </svg>
-  );
-
-  // beacon
-  return (
-    <svg viewBox="0 0 60 80" fill="none" style={{ width: "100%", height: "100%" }}>
-      <line x1="30" y1="10" x2="30" y2="70" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
-      <circle cx="30" cy="10" r="5" fill="rgba(196,164,96,0.15)" stroke="rgba(196,164,96,0.3)" strokeWidth="0.5" />
-      <circle cx="30" cy="10" r="2" fill="rgba(196,164,96,0.5)" />
-      <path d="M10,70 L50,70" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
-      <path d="M18,70 L22,50 L38,50 L42,70" fill="rgba(255,255,255,0.04)" />
-    </svg>
-  );
-}
 
 // ── Case study data ──────────────────────────────────────────────────
 const PROJECTS = [
@@ -304,21 +250,6 @@ const SKILLS = [
 
 // ── Page ─────────────────────────────────────────────────────────────
 export default function Home() {
-  const heroRef = useRef<HTMLElement>(null);
-  const [heroScroll, setHeroScroll] = useState(0);
-
-  // Parallax for hero boat
-  useEffect(() => {
-    function onScroll() {
-      if (!heroRef.current) return;
-      const h = heroRef.current.offsetHeight;
-      const pct = Math.min(window.scrollY / h, 1);
-      setHeroScroll(pct);
-    }
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
   // Reveal animation
   useEffect(() => {
     const els = document.querySelectorAll(".reveal");
@@ -337,7 +268,6 @@ export default function Home() {
       {/* ═══ HERO ═══════════════════════════════════════════════════ */}
       <section
         id="hero"
-        ref={heroRef}
         style={{
           position:    "relative",
           minHeight:   "100vh",
@@ -347,121 +277,13 @@ export default function Home() {
           paddingTop:  "52px",
         }}
       >
-        {/* Ocean background */}
+        {/* Headshot — right side */}
         <div
           style={{
             position: "absolute",
-            inset:    0,
-            background: "radial-gradient(ellipse 160% 65% at 50% 100%, #1866B8 0%, #0C3A6E 40%, #071D40 100%)",
-          }}
-        />
-
-        {/* Map grid overlay */}
-        <div
-          style={{
-            position:   "absolute",
-            inset:      0,
-            backgroundImage: `
-              linear-gradient(rgba(94,150,200,0.025) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(94,150,200,0.025) 1px, transparent 1px)
-            `,
-            backgroundSize: "80px 80px",
-            animation: "fadeDepth 12s ease-in-out infinite",
-          }}
-        />
-
-        {/* Depth marks */}
-        {DEPTH_MARKS.map((d, i) => (
-          <div
-            key={i}
-            style={{
-              position:     "absolute",
-              left:         `${d.x}%`,
-              top:          `${d.y}%`,
-              width:        `${d.s}px`,
-              height:       `${d.s}px`,
-              borderRadius: "50%",
-              background:   "rgba(140,200,255,1)",
-              opacity:      d.o * 0.75,
-            }}
-          />
-        ))}
-
-        {/* Water surface — animated wave lines */}
-        <div style={{ position: "absolute", inset: 0, pointerEvents: "none", overflow: "hidden" }}>
-          {/* Layer 1: slow drift */}
-          <svg style={{ position: "absolute", bottom: 0, left: 0, width: "200%", height: "55%", animation: "navWaterScroll 18s linear infinite", opacity: Math.min(0.75, 0.38 + heroScroll * 0.5) }} viewBox="0 0 2000 440" preserveAspectRatio="none">
-            {[40,80,118,156,196,236,276,318,360,400].map((y,i) => (
-              <path key={i}
-                d={`M0,${y} Q250,${y-6} 500,${y} Q750,${y+6} 1000,${y} Q1250,${y-6} 1500,${y} Q1750,${y+6} 2000,${y}`}
-                stroke={`rgba(90,170,240,${0.055+i*0.009})`} strokeWidth="0.9" fill="none"
-              />
-            ))}
-          </svg>
-          {/* Layer 2: faster counter-drift */}
-          <svg style={{ position: "absolute", bottom: 0, left: 0, width: "200%", height: "40%", animation: "navWaterScroll2 12s linear infinite", opacity: Math.min(0.6, 0.25 + heroScroll * 0.4) }} viewBox="0 0 2000 320" preserveAspectRatio="none">
-            {[30,72,114,158,202,248,292].map((y,i) => (
-              <path key={i}
-                d={`M0,${y} Q300,${y+8} 600,${y} Q900,${y-8} 1200,${y} Q1500,${y+8} 1800,${y} Q2000,${y-4} 2000,${y}`}
-                stroke={`rgba(140,210,255,${0.04+i*0.01})`} strokeWidth="0.7" fill="none"
-              />
-            ))}
-          </svg>
-          {/* Ripple rings at boat waterline — expand continuously */}
-          {[0,1,2].map(i => (
-            <div
-              key={i}
-              style={{
-                position: "absolute",
-                left: "66%",
-                top: "65%",
-                width: "70px",
-                height: "32px",
-                borderRadius: "50%",
-                border: "1px solid rgba(130,210,255,0.45)",
-                animation: "rippleExpand 2.8s ease-out infinite",
-                animationDelay: `${i * 0.93}s`,
-                pointerEvents: "none",
-              }}
-            />
-          ))}
-        </div>
-
-        {/* Island silhouettes */}
-        <div
-          style={{
-            position:  "absolute",
-            right:     "3%",
-            bottom:    "12%",
-            width:     "160px",
-            opacity:   Math.max(0, 0.35 - heroScroll * 0.6),
-            transform: `translateX(${heroScroll * 40}px)`,
-            transition: "opacity 0.1s, transform 0.1s",
-          }}
-        >
-          <IslandSilhouette type="city" />
-        </div>
-        <div
-          style={{
-            position:  "absolute",
-            right:     "18%",
-            bottom:    "18%",
-            width:     "90px",
-            opacity:   Math.max(0, 0.2 - heroScroll * 0.5),
-          }}
-        >
-          <IslandSilhouette type="beacon" />
-        </div>
-
-        {/* Headshot — parallax right side */}
-        <div
-          style={{
-            position:  "absolute",
-            right:     `calc(6% - ${heroScroll * 60}px)`,
-            top:       "50%",
-            transform: `translateY(-50%) translateY(${heroScroll * -20}px)`,
-            opacity:   Math.max(0, 1 - heroScroll * 2.2),
-            transition: "opacity 0.05s",
+            right:    "6%",
+            top:      "50%",
+            transform: "translateY(-50%)",
           }}
         >
           <Image
@@ -476,23 +298,9 @@ export default function Home() {
               borderRadius: "4px",
               display:      "block",
               objectFit:    "cover",
-              filter:       "brightness(0.92) contrast(1.04)",
             }}
           />
         </div>
-
-        {/* Fog gradient — right side */}
-        <div
-          style={{
-            position:   "absolute",
-            right:      0,
-            top:        0,
-            bottom:     0,
-            width:      "40%",
-            background: "linear-gradient(270deg, rgba(7,22,55,0.55) 0%, transparent 100%)",
-            pointerEvents: "none",
-          }}
-        />
 
         {/* Content */}
         <div
