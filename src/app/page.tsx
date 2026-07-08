@@ -14,187 +14,6 @@ const DEPTH_MARKS = Array.from({ length: 18 }, (_, i) => ({
   o: ((i * 13) % 4) / 10 + 0.03,
 }));
 
-// Hero boat — cartoon red-and-white speedboat, port side, bow pointing left
-function HeroBoat() {
-  return (
-    <svg viewBox="0 0 520 200" fill="none" style={{ width: "100%", height: "100%" }}>
-
-      {/* ── WATER & WAKE ── */}
-      {/* Light blue water ovals beneath hull */}
-      <ellipse cx="245" cy="168" rx="202" ry="17" fill="rgba(50,140,230,0.28)" />
-      <ellipse cx="210" cy="165" rx="148" ry="10" fill="rgba(90,170,245,0.2)" />
-      <ellipse cx="165" cy="164" rx="52" ry="5" fill="rgba(150,210,255,0.3)" />
-      <ellipse cx="92"  cy="163" rx="26" ry="4" fill="rgba(150,210,255,0.22)" />
-
-      {/* Stern wake / splash blob */}
-      <path d="M432,155 C450,148 468,143 484,140 C494,137 504,138 509,143 C514,149 511,157 505,163 C497,170 483,175 467,177 C451,179 436,177 430,172 Z"
-        fill="rgba(255,255,255,0.85)" />
-      <ellipse cx="494" cy="163" rx="17" ry="9" fill="rgba(255,255,255,0.72)" />
-      <circle cx="500" cy="156" r="5.5" fill="rgba(255,255,255,0.78)" />
-      <circle cx="508" cy="164" r="4"   fill="rgba(255,255,255,0.7)" />
-      <circle cx="513" cy="171" r="3"   fill="rgba(255,255,255,0.62)" />
-      <circle cx="490" cy="153" r="3.5" fill="rgba(255,255,255,0.66)" />
-
-      {/* Hull bottom foam spray */}
-      <path d="M68,163 Q200,170 362,167 Q412,166 436,162"
-        stroke="rgba(255,255,255,0.62)" strokeWidth="2.8" fill="none" strokeLinecap="round" />
-      <path d="M82,166 Q220,172 370,169 Q418,168 440,165"
-        stroke="rgba(255,255,255,0.38)" strokeWidth="1.6" fill="none" strokeLinecap="round" />
-
-      {/* Bow wave foam */}
-      <ellipse cx="50" cy="156" rx="19" ry="9"  fill="rgba(255,255,255,0.7)" />
-      <ellipse cx="42" cy="149" rx="12" ry="6.5" fill="rgba(255,255,255,0.55)" />
-      <path d="M47,144 C40,152 38,163 45,169"
-        stroke="rgba(255,255,255,0.72)" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-      <circle cx="39" cy="158" r="3.5" fill="rgba(255,255,255,0.72)" />
-      <circle cx="47" cy="165" r="2.5" fill="rgba(255,255,255,0.62)" />
-      <circle cx="56" cy="167" r="2"   fill="rgba(255,255,255,0.62)" />
-
-      {/* ── OUTBOARD MOTOR ── */}
-      {/* Cowling */}
-      <path d="M450,90 L468,86 L474,108 L470,124 L450,122 L446,108 Z"
-        fill="#2A2A38" />
-      <path d="M450,90 L468,86 L472,96 L456,100 Z" fill="#3C3C4C" />
-      <path d="M450,110 L470,109 L470,124 L450,122 Z" fill="#1E1E2C" />
-      <line x1="451" y1="103" x2="468" y2="101" stroke="rgba(255,255,255,0.11)" strokeWidth="0.8" />
-      <line x1="451" y1="107" x2="468" y2="106" stroke="rgba(255,255,255,0.11)" strokeWidth="0.8" />
-      <line x1="451" y1="111" x2="468" y2="110" stroke="rgba(255,255,255,0.11)" strokeWidth="0.8" />
-      {/* Lower unit */}
-      <rect x="457" y="122" width="11" height="36" rx="4" fill="#1A1A24" />
-      <rect x="458" y="124" width="9"  height="11" rx="1" fill="#222232" />
-      {/* Propeller */}
-      <ellipse cx="462" cy="158" rx="10" ry="5"  fill="#252535" />
-      <ellipse cx="462" cy="158" rx="4"  ry="2"  fill="#1A1A22" />
-
-      {/* ── RED HULL ── */}
-      {/* Main silhouette */}
-      <path d="
-        M 53,118
-        C 69,102 97,91 124,87
-        L 440,84
-        L 456,89
-        L 462,114
-        L 462,154
-        L 451,169
-        Q 316,179 186,176
-        Q 101,173 67,162
-        Q 55,145 53,118 Z
-      " fill="#D81818" />
-
-      {/* Glossy top highlight strip */}
-      <path d="
-        M 100,89 C 150,86 240,84 360,83 L 440,84 L 452,88
-        L 448,95 Q 300,92 155,94 Q 115,95 100,97 Z
-      " fill="rgba(255,85,55,0.22)" />
-
-      {/* Geometric mid-shadow panel */}
-      <path d="
-        M 74,105 Q 240,108 408,106 L 455,107 L 458,120
-        Q 345,115 215,117 Q 128,118 70,123 Z
-      " fill="rgba(95,0,0,0.17)" />
-
-      {/* Dark keel/bottom edge shadow */}
-      <path d="
-        M 67,162 Q 188,176 338,173 L 451,169
-        L 462,154 L 460,165
-        Q 322,179 186,176 Q 100,173 64,165 Z
-      " fill="rgba(80,0,0,0.3)" />
-
-      {/* Thin dark horizontal dividing line */}
-      <path d="M 80,107 Q 255,103 430,106 L 454,109"
-        stroke="#8B0000" strokeWidth="1.3" fill="none" />
-
-      {/* ── PORTHOLES ── */}
-      {/* Porthole 1 */}
-      <circle cx="167" cy="116" r="16"   fill="rgba(0,0,0,0.8)" />
-      <circle cx="167" cy="116" r="15"   fill="#0C0C14" stroke="#909090" strokeWidth="2.5" />
-      <circle cx="167" cy="116" r="11.5" fill="#070710" />
-      <ellipse cx="164" cy="113" rx="4" ry="2.5" fill="rgba(255,255,255,0.14)" />
-      {/* Porthole 2 */}
-      <circle cx="215" cy="114" r="14"   fill="rgba(0,0,0,0.8)" />
-      <circle cx="215" cy="114" r="13"   fill="#0C0C14" stroke="#909090" strokeWidth="2.5" />
-      <circle cx="215" cy="114" r="10"   fill="#070710" />
-      <ellipse cx="212" cy="111" rx="3.5" ry="2" fill="rgba(255,255,255,0.14)" />
-
-      {/* ── UPPER DECK & CABIN (white/gray) ── */}
-      {/* Forward deck panel */}
-      <path d="M 124,87 L 222,84 L 226,79 L 158,79 L 120,84 Z"
-        fill="#E8E8E8" />
-
-      {/* Main cabin body */}
-      <path d="
-        M 222,84 L 228,51 L 413,49 L 438,59 L 453,75
-        L 456,89 L 440,84 L 222,84 Z
-      " fill="#EBEBEB" />
-
-      {/* Cabin right-side depth panel */}
-      <path d="M 438,59 L 453,67 L 456,89 L 440,84 L 450,75 Z"
-        fill="#CECECE" />
-
-      {/* Window 1 — front */}
-      <path d="M 232,55 L 239,51 L 292,51 L 290,65 L 230,65 Z"
-        fill="#78ADCA" />
-      <path d="M 234,54 L 250,52 L 250,58 L 234,60 Z"
-        fill="rgba(255,255,255,0.32)" />
-      <path d="M 232,55 L 239,51 L 292,51 L 290,65 L 230,65 Z"
-        stroke="#555" strokeWidth="0.8" fill="none" />
-
-      {/* Window 2 — middle */}
-      <path d="M 296,50 L 350,50 L 348,65 L 294,65 Z" fill="#78ADCA" />
-      <path d="M 298,50 L 316,50 L 316,57 L 298,58 Z"
-        fill="rgba(255,255,255,0.28)" />
-      <path d="M 296,50 L 350,50 L 348,65 L 294,65 Z"
-        stroke="#555" strokeWidth="0.8" fill="none" />
-
-      {/* Window 3 — rear */}
-      <path d="M 354,50 L 406,50 L 404,63 L 352,63 Z" fill="#78ADCA" />
-      <path d="M 356,50 L 376,50 L 376,57 L 356,58 Z"
-        fill="rgba(255,255,255,0.25)" />
-      <path d="M 354,50 L 406,50 L 404,63 L 352,63 Z"
-        stroke="#555" strokeWidth="0.8" fill="none" />
-
-      {/* Cabin roof */}
-      <path d="
-        M 222,51 L 230,41 L 420,39 L 448,51
-        L 438,59 L 413,49 L 228,51 Z
-      " fill="#F4F4F4" />
-      {/* Roof front-slope highlight */}
-      <path d="M 222,51 L 230,41 L 296,40 L 286,50 L 222,51 Z"
-        fill="rgba(255,255,255,0.45)" />
-      {/* Roof stern overhang */}
-      <path d="M 438,59 L 448,51 L 464,67 L 456,89 L 448,75 Z"
-        fill="#E6E6E6" />
-
-      {/* White side panel sweeping up toward rear */}
-      <path d="M 408,84 L 438,59 L 453,67 L 453,84 Z"
-        fill="#F0F0F0" />
-
-      {/* ── CHROME RAILING ── */}
-      {/* Bow railing curve */}
-      <path d="M 70,114 C 77,100 90,92 106,88"
-        stroke="#B8C4CC" strokeWidth="2.2" fill="none" strokeLinecap="round" />
-      {/* Main railing line bow → cabin */}
-      <path d="M 105,88 L 224,82"
-        stroke="#B8C4CC" strokeWidth="1.9" fill="none" strokeLinecap="round" />
-      {/* Vertical posts */}
-      <line x1="112" y1="88"  x2="112" y2="93"  stroke="#B8C4CC" strokeWidth="1.5" strokeLinecap="round" />
-      <line x1="136" y1="87"  x2="137" y2="92"  stroke="#B8C4CC" strokeWidth="1.5" strokeLinecap="round" />
-      <line x1="160" y1="86"  x2="161" y2="91"  stroke="#B8C4CC" strokeWidth="1.5" strokeLinecap="round" />
-      <line x1="184" y1="85"  x2="185" y2="90"  stroke="#B8C4CC" strokeWidth="1.5" strokeLinecap="round" />
-      {/* Diagonal bow braces */}
-      <line x1="84"  y1="88"  x2="80"  y2="97"  stroke="#B8C4CC" strokeWidth="1.4" strokeLinecap="round" />
-      <line x1="97"  y1="87"  x2="93"  y2="96"  stroke="#B8C4CC" strokeWidth="1.4" strokeLinecap="round" />
-
-      {/* Hull outline */}
-      <path d="
-        M 53,118 C 69,102 97,91 124,87
-        L 440,84 L 456,89 L 462,114 L 462,154
-      " stroke="rgba(0,0,0,0.11)" strokeWidth="0.8" fill="none" strokeLinecap="round" />
-
-    </svg>
-  );
-}
-
 // Island silhouettes — architectural, not tropical
 function IslandSilhouette({ type }: { type: "city" | "grid" | "beacon" }) {
   if (type === "city") return (
@@ -634,20 +453,32 @@ export default function Home() {
           <IslandSilhouette type="beacon" />
         </div>
 
-        {/* Hero boat — parallax right side */}
+        {/* Headshot — parallax right side */}
         <div
           style={{
             position:  "absolute",
-            right:     `calc(8% - ${heroScroll * 80}px)`,
+            right:     `calc(6% - ${heroScroll * 60}px)`,
             top:       "50%",
-            transform: `translateY(-50%) translateY(${heroScroll * -30}px)`,
-            width:     "clamp(240px, 32vw, 420px)",
+            transform: `translateY(-50%) translateY(${heroScroll * -20}px)`,
             opacity:   Math.max(0, 1 - heroScroll * 2.2),
-            animation: "boatIdle 5s ease-in-out infinite",
             transition: "opacity 0.05s",
           }}
         >
-          <HeroBoat />
+          <Image
+            src="/profile.jpg"
+            alt="Brandon Nguyen"
+            width={320}
+            height={400}
+            priority
+            style={{
+              width:        "clamp(180px, 22vw, 320px)",
+              height:       "auto",
+              borderRadius: "4px",
+              display:      "block",
+              objectFit:    "cover",
+              filter:       "brightness(0.92) contrast(1.04)",
+            }}
+          />
         </div>
 
         {/* Fog gradient — right side */}
