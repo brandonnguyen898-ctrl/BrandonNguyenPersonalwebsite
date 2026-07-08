@@ -521,7 +521,7 @@ export default function Home() {
                 letterSpacing: "-0.01em",
               }}
             >
-              I grew up in Tacoma, Washington, and came to Yale after starting at Tacoma Community College.
+              I grew up in Tacoma, Washington, as a first-generation student raised by business owner parents. That background shaped the way I think about work: practical, resourceful, and focused on solving real problems.
             </h2>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "1rem", color: "var(--text-2)", lineHeight: 1.8 }}>
