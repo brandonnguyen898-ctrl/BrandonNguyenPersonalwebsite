@@ -279,6 +279,7 @@ export default function Home() {
       >
         {/* Headshot — fills right half of hero */}
         <div
+          className="hero-photo"
           style={{
             position: "absolute",
             right:    0,
@@ -310,6 +311,7 @@ export default function Home() {
 
         {/* Content */}
         <div
+          className="hero-content-pad"
           style={{
             position:  "relative",
             zIndex:    2,
@@ -438,7 +440,7 @@ export default function Home() {
       </section>
 
       {/* ═══ ABOUT ══════════════════════════════════════════════════ */}
-      <section id="about" style={{ padding: "96px 40px", maxWidth: "1200px", margin: "0 auto" }}>
+      <section id="about" className="section-pad reveal" style={{ padding: "96px 40px", maxWidth: "1200px", margin: "0 auto" }}>
         <div className="reveal">
           <div className="label"><span>About</span></div>
         </div>
@@ -450,7 +452,7 @@ export default function Home() {
             gap:                 "64px",
             alignItems:          "start",
           }}
-          className="reveal"
+          className="about-grid reveal"
         >
           {/* Photo + education */}
           <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
@@ -586,7 +588,7 @@ export default function Home() {
       </section>
 
       {/* ═══ SELECTED WORK ══════════════════════════════════════════ */}
-      <section id="work" style={{ padding: "96px 40px", maxWidth: "1200px", margin: "0 auto" }}>
+      <section id="work" className="section-pad" style={{ padding: "96px 40px", maxWidth: "1200px", margin: "0 auto" }}>
         <div className="reveal">
           <div className="label"><span>Selected Work</span></div>
           <p style={{ fontSize: "0.85rem", color: "var(--text-2)", marginBottom: "3rem", maxWidth: "480px" }}>
@@ -597,7 +599,7 @@ export default function Home() {
         <div
           style={{
             display:             "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(480px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fill, minmax(min(480px, 100%), 1fr))",
             gap:                 "1px",
             background:          "var(--border)",
             border:              "1px solid var(--border)",
@@ -783,7 +785,7 @@ export default function Home() {
                       </div>
                       <div
                         style={{
-                          fontSize:      "0.6rem",
+                          fontSize:      "0.6875rem",
                           fontWeight:    600,
                           letterSpacing: "0.1em",
                           textTransform: "uppercase",
@@ -809,11 +811,11 @@ export default function Home() {
       </section>
 
       {/* ═══ INVESTING ══════════════════════════════════════════════ */}
-      <section id="investing" style={{ padding: "96px 40px", maxWidth: "1200px", margin: "0 auto" }}>
+      <section id="investing" className="section-pad" style={{ padding: "96px 40px", maxWidth: "1200px", margin: "0 auto" }}>
         <div className="reveal">
           <div className="label"><span>Investing</span></div>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "64px", alignItems: "start" }}>
+        <div className="investing-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "64px", alignItems: "start" }}>
           <div className="reveal">
             <h2 style={{ fontFamily: "var(--font-serif)", fontSize: "clamp(1.5rem, 2.2vw, 2.2rem)", fontWeight: 400, color: "var(--text-1)", lineHeight: 1.2, marginBottom: "1.5rem" }}>
               I&apos;m interested in investing because it rewards clear thinking.
@@ -921,7 +923,7 @@ export default function Home() {
       </section>
 
       {/* ═══ PUBLIC SERVICE ═════════════════════════════════════════ */}
-      <section id="service" style={{ padding: "96px 40px", maxWidth: "1200px", margin: "0 auto" }}>
+      <section id="service" className="section-pad" style={{ padding: "96px 40px", maxWidth: "1200px", margin: "0 auto" }}>
         <div className="reveal">
           <div className="label"><span>Public Service</span></div>
           <p style={{ fontSize: "0.85rem", color: "var(--text-2)", marginBottom: "3rem", maxWidth: "500px" }}>
@@ -987,7 +989,7 @@ export default function Home() {
       </section>
 
       {/* ═══ EXPERIENCE ═════════════════════════════════════════════ */}
-      <section id="leadership" style={{ padding: "96px 40px", maxWidth: "900px", margin: "0 auto" }}>
+      <section id="leadership" className="section-pad" style={{ padding: "96px 40px", maxWidth: "900px", margin: "0 auto" }}>
         <div className="reveal">
           <div className="label"><span>Experience</span></div>
         </div>
@@ -1039,7 +1041,7 @@ export default function Home() {
       </section>
 
       {/* ═══ SKILLS ═════════════════════════════════════════════════ */}
-      <section id="skills" style={{ padding: "96px 40px", maxWidth: "1200px", margin: "0 auto" }}>
+      <section id="skills" className="section-pad" style={{ padding: "96px 40px", maxWidth: "1200px", margin: "0 auto" }}>
         <div className="reveal">
           <div className="label"><span>Skills</span></div>
         </div>
@@ -1085,7 +1087,7 @@ export default function Home() {
       </section>
 
       {/* ═══ CONTACT ════════════════════════════════════════════════ */}
-      <section id="contact" style={{ padding: "96px 40px 120px", maxWidth: "900px", margin: "0 auto" }}>
+      <section id="contact" className="section-pad-contact" style={{ padding: "96px 40px 120px", maxWidth: "900px", margin: "0 auto" }}>
         <div className="reveal" style={{ borderTop: "1px solid var(--border)", paddingTop: "64px" }}>
           <div className="label"><span>Contact</span></div>
           <h2
@@ -1128,7 +1130,7 @@ export default function Home() {
             </a>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, auto)", gap: "40px", width: "fit-content" }}>
+          <div className="contact-info-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, auto)", gap: "40px", width: "fit-content" }}>
             {[
               { k: "Email",    v: "B.nguyen@yale.edu", href: "mailto:B.nguyen@yale.edu" },
               { k: "Phone",    v: "(253) 240-5196",     href: "tel:+12532405196"          },
@@ -1151,7 +1153,7 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer style={{ borderTop: "1px solid var(--border)", padding: "20px 40px", textAlign: "center" }}>
+      <footer className="footer-pad" style={{ borderTop: "1px solid var(--border)", padding: "20px 40px", textAlign: "center" }}>
         <p style={{ fontSize: "0.75rem", color: "var(--text-3)" }}>
           &copy; 2026 Brandon Luu Nguyen &nbsp;&middot;&nbsp; Tacoma, WA
         </p>

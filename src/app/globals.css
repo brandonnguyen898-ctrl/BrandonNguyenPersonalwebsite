@@ -222,3 +222,15 @@ body::after {
     transition-duration:      0.01ms !important;
   }
 }
+
+/* ── Mobile ── */
+@media (max-width: 640px) {
+  .section-pad         { padding: 64px 20px !important; }
+  .section-pad-contact { padding: 64px 20px 80px !important; }
+  .hero-content-pad    { padding: 48px 20px !important; }
+  .hero-photo          { display: none !important; }
+  .about-grid          { grid-template-columns: 1fr !important; gap: 32px !important; }
+  .investing-grid      { grid-template-columns: 1fr !important; gap: 32px !important; }
+  .contact-info-grid   { grid-template-columns: 1fr !important; gap: 12px !important; }
+  .footer-pad          { padding: 16px 20px !important; }
+}
