@@ -277,29 +277,35 @@ export default function Home() {
           paddingTop:  "52px",
         }}
       >
-        {/* Headshot — right side */}
+        {/* Headshot — fills right half of hero */}
         <div
           style={{
             position: "absolute",
-            right:    "6%",
-            top:      "50%",
-            transform: "translateY(-50%)",
+            right:    0,
+            top:      0,
+            bottom:   0,
+            width:    "45%",
+            overflow: "hidden",
           }}
         >
           <Image
             src="/profile.jpg"
             alt="Brandon Nguyen"
-            width={320}
-            height={400}
+            fill
             priority
+            sizes="45vw"
             style={{
-              width:        "clamp(180px, 22vw, 320px)",
-              height:       "auto",
-              borderRadius: "4px",
-              display:      "block",
-              objectFit:    "cover",
+              objectFit:      "cover",
+              objectPosition: "center top",
             }}
           />
+          {/* Fade left edge into background */}
+          <div style={{
+            position:   "absolute",
+            inset:      0,
+            background: "linear-gradient(90deg, var(--bg) 0%, transparent 30%)",
+            pointerEvents: "none",
+          }} />
         </div>
 
         {/* Content */}
