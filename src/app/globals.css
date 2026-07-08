@@ -228,6 +228,20 @@ body::after {
   50%       { transform: translateY(-2px); }
 }
 
+/* ── Nav water ── */
+@keyframes navWaterScroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+@keyframes navWaterScroll2 {
+  0%   { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+@keyframes rippleExpand {
+  0%   { transform: translate(-50%, -50%) scale(0.3); opacity: 0.55; }
+  100% { transform: translate(-50%, -50%) scale(10);  opacity: 0; }
+}
+
 /* ── Reduce motion ── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
