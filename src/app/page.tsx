@@ -521,10 +521,13 @@ export default function Home() {
                 letterSpacing: "-0.01em",
               }}
             >
-              I grew up in Tacoma, Washington, as a first-generation student raised by business owner parents. That background shaped the way I think about work: practical, resourceful, and focused on solving real problems.
+              I grew up in Tacoma, Washington, as a first-generation student raised by business owner parents.
             </h2>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "1rem", color: "var(--text-2)", lineHeight: 1.8 }}>
+              <p>
+                That background shaped the way I think about work: practical, resourceful, and focused on solving real problems.
+              </p>
               <p>
                 I&apos;m interested in the kinds of problems that require both careful analysis and practical
                 follow-through: evaluating an investment, helping someone navigate a legal system,
