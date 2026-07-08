@@ -173,10 +173,11 @@ function IslandSilhouette({ type }: { type: "city" | "grid" | "beacon" }) {
 const PROJECTS = [
   {
     id: "dashboard",
-    title: "Seattle Student Housing Asset Management Dashboard",
+    title: "Nordic Partners Investments Asset Management Dashboard",
     category: "Asset Management · Operations",
     status: "Confidential",
     file: null,
+    link: "https://nordic-partners-dashboard.vercel.app/login",
     summary: "Two co-managed student housing properties in Seattle needed a clearer way to track performance, identify issues, and make operating decisions.",
     bullets: [
       "Built KPI bridges from current occupancy to signed-lease and stabilized occupancy",
@@ -866,6 +867,7 @@ export default function Home() {
                 background:       "var(--surface)",
                 padding:          "28px",
                 transitionDelay:  `${i * 0.06}s`,
+                gridColumn:       i === PROJECTS.length - 1 && PROJECTS.length % 2 === 1 ? "1 / -1" : "auto",
               }}
             >
               {/* Header */}
@@ -908,6 +910,34 @@ export default function Home() {
                   >
                     {p.status}
                   </span>
+                  {"link" in p && p.link && (
+                  <a
+                    href={p.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display:        "inline-flex",
+                      alignItems:     "center",
+                      gap:            "5px",
+                      fontSize:       "0.6875rem",
+                      color:          "var(--text-3)",
+                      textDecoration: "none",
+                      padding:        "3px 8px",
+                      border:         "1px solid var(--border)",
+                      borderRadius:   "3px",
+                      transition:     "all 0.2s ease",
+                    }}
+                    onMouseEnter={(e) => { const el = e.currentTarget; el.style.color = "var(--text-1)"; el.style.borderColor = "var(--border-md)"; }}
+                    onMouseLeave={(e) => { const el = e.currentTarget; el.style.color = "var(--text-3)"; el.style.borderColor = "var(--border)"; }}
+                  >
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" />
+                      <polyline points="15 3 21 3 21 9" />
+                      <line x1="10" y1="14" x2="21" y2="3" />
+                    </svg>
+                    View
+                  </a>
+                  )}
                   {p.file && (
                   <a
                     href={p.file}
